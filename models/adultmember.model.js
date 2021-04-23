@@ -1,7 +1,5 @@
-//listeMineurs
-//age 
 const mongoose = require('mongoose');
-
+                                                                                                                                
 const adultMemberSchema = new mongoose.Schema(
     {
         member: {
