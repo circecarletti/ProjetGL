@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 
+//loan schema 
 const loanSchema = new mongoose.Schema(
     {
         email: {

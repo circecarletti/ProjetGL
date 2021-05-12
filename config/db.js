@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//database configurations
 mongoose
     .connect("mongodb+srv://" + process.env.DB_USER_PASS + "@gla.qt6kv.mongodb.net/gla",
         {

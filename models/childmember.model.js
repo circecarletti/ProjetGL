@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 
+//child member schema 
 const childMemberSchema = new mongoose.Schema(
     {
         member: {

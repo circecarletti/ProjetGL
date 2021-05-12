@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 
+//manager schema 
 const managerSchema = new mongoose.Schema(
     {
         email: {

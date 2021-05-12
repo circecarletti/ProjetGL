@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-                                                                                                                                
+
+//adult member schema 
 const adultMemberSchema = new mongoose.Schema(
     {
         member: {

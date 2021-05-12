@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//ressource schema
 const resourceSchema = new mongoose.Schema(
     {
         id: {
