@@ -10,6 +10,10 @@ module.exports.signUp = async (req, res) => {
     const {email, password, name, firstName, age} = req.body
 
     try {
+        //check age
+        if(!((age >= 18 ) && (age <= 100)))
+            return res.status(409).send({sucess: false, message: 'age error'});
+
         //creating member
         const member = await MemberModel.create({email, password, name, firstName });
         //creating adulmember,  member included in adultmember
@@ -38,7 +42,9 @@ module.exports.signUpChild = async (req, res) => {
         const id = idMember[0]._id;
         //check existence of adultmember
         const userExists = await AdultMemberModel.exists({ member : id }); 
-
+        //check age 
+        if(!((age >= 4 ) && (age <= 17)))
+            return res.status(409).send({sucess: false, message: 'age error'});
         if(userExists){
             //get adultmember id
             const idAdultM = await AdultMemberModel.find({ member: id}).select("_id");
