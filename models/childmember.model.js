@@ -14,7 +14,7 @@ const childMemberSchema = new mongoose.Schema(
             min: 4,
             max: 17,
             trim: true,
-            required: true,
+            required: true
         },
         adultMember: {
             type: String,
