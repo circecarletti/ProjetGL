@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
+const bcrypt = require('bcrypt');
 
 //member schema 
 const memberSchema = new mongoose.Schema(
@@ -67,7 +68,16 @@ const memberSchema = new mongoose.Schema(
             default: false
         }
     }
-)
+);
+
+//password encryption with bcrypt
+//cryptage mdp
+memberSchema.pre("save", async function(next) {
+    //salage du mot de passe
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const MemberModel = mongoose.model('member', memberSchema);
 module.exports = MemberModel;

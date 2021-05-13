@@ -4,20 +4,20 @@ const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
 const ManagerModel = require('../models/manager.model');
 
+
 //signup member
+//fonction inscription 
 module.exports.signUp = async (req, res) => {
     console.log(req.body);
-    const {email, password, name, firstName, age} = req.body
+    const {email, password, name, firstName, age, balance} = req.body
 
     try {
-        //check age
-        if(!((age >= 18 ) && (age <= 100)))
-            return res.status(409).send({sucess: false, message: 'age error'});
+        //creating member 
+        await MemberModel.create({email, password, name, firstName, balance });
 
-        //creating member
-        const member = await MemberModel.create({email, password, name, firstName });
         //creating adulmember,  member included in adultmember
-        const user = await AdultMemberModel.create({ member, age }); 
+        const user = await AdultMemberModel.create({ email, age }); 
+
         console.log('Member successfully created!'); 
         return res.status(201).send({ sucess: true, user: user._id }); 
     }
@@ -30,31 +30,22 @@ module.exports.signUp = async (req, res) => {
 }
 
 //signup childmember
+//fonction creerCompteMineur
 module.exports.signUpChild = async (req, res) => {
     console.log(req.body);
     const {email, password, name, firstName, age, adultMember} = req.body
 
     try {
-        //check existence of member
-        const idMember = await MemberModel.find({ email: adultMember}).select("_id");
-        if ((idMember.length == 0))
-            return res.status(404).send({sucess: false, message: 'member not found'});
-        const id = idMember[0]._id;
         //check existence of adultmember
-        const userExists = await AdultMemberModel.exists({ member : id }); 
-        //check age 
-        if(!((age >= 4 ) && (age <= 17)))
-            return res.status(409).send({sucess: false, message: 'age error'});
+        const userExists = await AdultMemberModel.exists({ email : adultMember }); 
+
         if(userExists){
-            //get adultmember id
-            const idAdultM = await AdultMemberModel.find({ member: id}).select("_id");
-            const idAdultMember = idAdultM[0]._id;
             //creating member
-            const member = await MemberModel.create({email, password, name, firstName });
+            await MemberModel.create({email, password, name, firstName });
             //creating child member
-            const user = await ChildMemberModel.create({ member, age, adultMember });
+            const user = await ChildMemberModel.create({ email, age, adultMember });
             //update adult member add childmember
-            AdultMemberModel.findOneAndUpdate({"_id":idAdultMember},{
+            AdultMemberModel.findOneAndUpdate({"email":adultMember},{
                 "$push": {"childList" : email}
             },{new: true, safe: true, upsert: true }, function(error){
                 if(error)

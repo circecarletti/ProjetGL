@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
+const bcrypt = require('bcrypt');
 
 //manager schema 
 const managerSchema = new mongoose.Schema(
@@ -35,6 +36,15 @@ const managerSchema = new mongoose.Schema(
         }
     }
 )
+
+//password encryption with bcrypt
+//cryptage mdp
+managerSchema.pre("save", async function(next) {
+    //salage du mot de passe
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const ManagerModel = mongoose.model('manager', managerSchema);
 module.exports = ManagerModel;
