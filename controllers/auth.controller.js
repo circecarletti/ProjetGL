@@ -19,13 +19,13 @@ module.exports.signUp = async (req, res) => {
         const user = await AdultMemberModel.create({ email, age }); 
 
         console.log('Member successfully created!'); 
-        return res.status(201).send({ sucess: true, user: user._id }); 
+        return res.status(201).json({ success: true, user: user.email }); 
     }
     catch(err) {
         if(err.code == 11000)
-            return res.status(409).send({ sucess: false, message: 'ID existed' });
+            return res.status(409).json({ success: false, message: 'ID existed' });
        else 
-            return res.status(400).send({ sucess: false, err });
+            return res.status(400).send({ success: false, err });
     }
 }
 
@@ -52,15 +52,15 @@ module.exports.signUpChild = async (req, res) => {
                     return res.status(500).send({ success: false, message: "Database Error"});
             });
             console.log('ChildMember successfully created!'); 
-            return res.status(201).send({sucess: true, user: user._id});
+            return res.status(201).json({success: true, user: user.email});
         } else 
-            return res.status(404).send({sucess: false, message: 'Adultmember not found'});
+            return res.status(404).send({success: false, message: 'Adultmember not found'});
     }
     catch(err) {
         if(err.code == 11000)
-            return res.status(409).send({sucess: false, message: 'ID existed'});
+            return res.status(409).json({success: false, message: 'ID existed'});
         else 
-            return res.status(400).send({sucess: false, err });
+            return res.status(400).send({success: false, err });
     }
 }
 
@@ -73,12 +73,12 @@ module.exports.signUpManager = async (req, res) => {
         //creating manager user
         const user = await ManagerModel.create({ email, password, name, firstName });
         console.log('Manager successfully created!'); 
-        res.status(201).send({sucess: true, user: user._id}); 
+        res.status(201).json({success: true, user: user.email}); 
     }
     catch(err) {
         if(err.code == 11000)
-            return res.status(409).send({ sucess: false, message: 'ID existed' });
+            return res.status(409).json({ success: false, message: 'ID existed' });
        else 
-            return res.status(400).send({ sucess: false, err });
+            return res.status(400).send({ success: false, err });
     }
 }
