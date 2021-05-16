@@ -1,16 +1,36 @@
 <template>
-  <section>
-    <main-components></main-components>
-  </section>
+  <app-header></app-header>  
+
+  <div class="center">
+    
+  </div>
+
+  <app-footer></app-footer>
 </template>
 
+
 <script>
-import PrincipalsComponents from './components/PrincipalsComponents';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 export default {
   components : {
-    "main-components" : PrincipalsComponents
+    "app-header" : Header,
+    "app-footer" : Footer,
   },
-}
-</script>
 
+  // props: [
+  //   'connected'
+  // ],
+  
+  data(){
+    return {
+    };
+  },
+
+
+  methods : {
+  }
+
+};
+</script>
