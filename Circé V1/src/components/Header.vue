@@ -1,18 +1,12 @@
 <template>
   <header>      
-    <h1> Médiathèque d'Orsay </h1>   
-    <div v-if="isLogIn">
-      <div id="logOut">
-        <button @click="logOut">deconnexion</button>
-      </div>
+    <div class="left-area">
+      <h1>Orsay Médiathèque</h1>
     </div>
-    <div v-else>
-      <div id="SignIn">
-        <button @click="signIn">inscription</button> 
-      </div>
-      <div id="logIn">
-        <button @click="logInCustomer">connexion</button>
-      </div>
+    <div class="right-area">
+      <button v-if="isLogIn" @click="logOut">deconnexion</button>
+      <button v-if="!isLogIn" @click="signIn">inscription</button> 
+      <button v-if="!isLogIn" @click="logInCustomer">connexion</button>
     </div>
   </header>
 </template>
@@ -43,3 +37,40 @@ export default {
   }
 };
 </script>
+
+
+<!-- Le scoped permet d'appliquer les css 'localement'=> ici uniquement
+     au composant Header.vue -->
+
+<style scoped>
+header {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    border-bottom: solid 1px black;
+}
+
+.left-area {
+    display: flex;
+    height: 100%;
+    width: 50%;
+    justify-content: left;
+    align-items: center;
+    padding-left: 2rem;
+}
+
+.right-area {
+    display: flex;
+    height: 100%;
+    width: 50%;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 2rem;
+}
+
+button {
+    height: 1.5rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+</style>
