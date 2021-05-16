@@ -1,17 +1,17 @@
 <template>
   <header>      
     <h1> Médiathèque d'Orsay </h1>   
-    <div v-if="connected">
+    <div v-if="isLogIn">
       <div id="logOut">
-        <button @click="logOut()">deconnexion</button>
+        <button @click="logOut">deconnexion</button>
       </div>
     </div>
     <div v-else>
       <div id="SignIn">
-        <button @click="SignIn()">inscription</button> 
+        <button @click="signIn">inscription</button> 
       </div>
       <div id="logIn">
-        <button @click="logIn()">connexion</button>
+        <button @click="logInCustomer">connexion</button>
       </div>
     </div>
   </header>
@@ -23,23 +23,23 @@
 export default {
   
   data(){
-    return {
-      connected : false,
-    };
+    return {};
   },
 
+  computed : {
+    isLogIn(){
+      return this.$store.getters['isUserAuthenticated'];
+    }
+  },
 
   methods : {
-    logIn() {
-      this.connected = true;
-      console.log('connexion...');
+    logInCustomer(){
+      this.$store.dispatch('setUserAsCustomer');
     },
 
-    logOut() {
-      this.connected = false;
-      console.log('deconnexion...');
+    logOut(){
+      this.$store.dispatch('setUserAsUnAuthenticated');
     }
   }
-
 };
 </script>
