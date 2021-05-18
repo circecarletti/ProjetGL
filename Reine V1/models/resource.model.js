@@ -5,16 +5,13 @@ const resourceSchema = new mongoose.Schema(
     {
         id: {
             type: Number,
+            trim: true,
             required: true,
-            unique: true,
-            trim: true
+            unique:true
         },
         idMember: {
-            type: String,
-            validate: [isEmail],
-            lowercase: true, 
-            unique: true,
-            trim: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref : "member"
         },
         title: {
             type: String,
@@ -23,7 +20,7 @@ const resourceSchema = new mongoose.Schema(
             minlength: 3,
             trim: true
         },
-        categorie: { 
+        category: { 
             type: String, 
             enum: ['enfant', 'adulte', 'tousPublic'],
             required: true

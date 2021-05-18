@@ -2,47 +2,93 @@ const AdultMemberModel = require('../models/adultMember.model');
 const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
 const ManagerModel = require('../models/manager.model');
-const { isEmail } = require('validator');
+const ResourceModel = require('../models/resource.model');
 
 
 //informations user 
-module.exports.userInfo = (req, res) => {
-    console.log(req.params);
-    if(!((req.params.email).isEmail() && ((MemberModel.find({'email': req.params.email}).count() > 0) || (ManagerModel.find({'email': req.params.email}).count() > 0))))
-        return res.status(400).send('email unknown : ' + req.params.email)
+module.exports.userInfo = async (req, res) => {
+
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await MemberModel.exists({ id: email}) || await ManagerModel.exists({ id: email})))
+        return res.status(400).send('email not in database : ' + email);
     
-    if(AdultMemberModel.find({'email': req.params.email}).count() > 0 ){
-        console.log(AdultMemberModel.aggregate([
-            { 
-                $match: { email : req.params.email } },
-                { 
-                $lookup: { 
-                    from: 'members',
-                    localField: 'email',
-                    foreignField: 'email', 
-                    as: 'adult_member' } 
-                }
-            ]).pretty()/*.select('-password')*/ /*.where(email)*/).exec((err, result) => {
-                if (err) throw err;
-                console.log(result);
+    //adult  
+    if(await AdultMemberModel.exists({id: email})){
+         await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
+            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
+            .then(function(infomembers){
+                console.log('mail ' + email);
+                return res.status(200).json(infomembers);
             })
-        
-        
-
-        //AdultMemberModel.findById()
-    }/*
-    else if(ChildMemberModel.find({'email': req.params.email}).count() > 0 ){
-
+            .catch(function(err) {
+                return res.status(400).json({success: true, message : ' error email', err});
+            });
     }
-    else { //email manager
-        MemberModel.findById(req.params.email, (err, docs) => {
-            if(!err) res.send(docs);
-            else console.log(err);
-        }).select('-password');
-
+    //child
+    else if(await ChildMemberModel.exists({id: email})){
+        await ChildMemberModel.findOne({ id : email}, '-__v -_id')
+            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")   
+            .then(function(infomembers){
+                return res.status(200).json(infomembers);
+            })
+            .catch(function(err) {
+                return res.status(400).json({success: true, message : 'error email', err});
+            });
+    }
+    else { // manager
+        await ManagerModel.findOne({id : email }, '-password -__v -_id')
+            .then(function(infomanagers){
+                return res.status(200).json(infomanagers);
+            })
+            .catch(function(err) {
+                return res.status(400).json({succes : false, message : 'error email', err});
+            });
     };
+};
 
-*/
 
+module.exports.updateName = async (req, res) => {
+    const email = req.params.id;
+    const agemember = req.params.age;
 
+    //check if email is in the database
+    if(!(await MemberModel.exists({ id: email})))
+        return res.status(400).send('email not in database : ' + email);
+    
+    try {
+        if(await AdultMemberModel.exists({id: email})){
+            await AdultMemberModel.findByIdAndUpdate(
+                {id: email}, 
+                {
+                    $set: {
+                        age: agemember
+                    }
+                },
+                { new: true, upsert: true, setDefaultsOnInsert: true},
+                (err,docs) => {
+                    if (!err) return res.send(docs);
+                    if(err) return res.status(500).send({succes: false, message: err});
+                }
+            )
+       }
+       else {
+           await ChildMemberModel.findByIdAndUpdate(
+            {id: email}, 
+            {
+                $set: {
+                    age: agemember
+                }
+            },
+            { new: true, upsert: true, setDefaultsOnInsert: true},
+            (err,docs) => {
+                if (!err) return res.send(docs);
+                if(err) return res.status(500).send({succes: false, message: err});
+            }
+        )
+       }     
+    } catch (err) {
+        return res.status(500).json({succes: false, message: err});
+   }
 };

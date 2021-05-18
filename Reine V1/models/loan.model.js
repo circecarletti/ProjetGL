@@ -4,19 +4,15 @@ const { isEmail } = require('validator');
 //loan schema 
 const loanSchema = new mongoose.Schema(
     {
-        email: {
-            type: String,
-            required: true,
-            validate: [isEmail],
-            lowercase: true, 
+        idAdherent: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'members',
             unique: true,
-            trim: true
+            required: true
         },
-        idResources: {
-            type: [Number]
-        }
+        idResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'resource', default: null}]
     }
-)
+);
 
 const LoanModel = mongoose.model('loan', loanSchema);
 module.exports = LoanModel;
