@@ -3,9 +3,11 @@ const mongoose = require('mongoose');
 //ressource schema
 const resourceSchema = new mongoose.Schema(
     {
-        _id: {
+        id: {
             type: Number,
-            trim: true
+            trim: true,
+            required: true,
+            unique:true
         },
         idMember: {
             type: mongoose.Schema.Types.ObjectId,
@@ -18,7 +20,7 @@ const resourceSchema = new mongoose.Schema(
             minlength: 3,
             trim: true
         },
-        categorie: { 
+        category: { 
             type: String, 
             enum: ['enfant', 'adulte', 'tousPublic'],
             required: true

@@ -5,11 +5,13 @@ const bcrypt = require('bcrypt');
 //manager schema 
 const managerSchema = new mongoose.Schema(
     {
-        _id: {
+        id: {
             type: String,
             validate: [isEmail],
             lowercase: true, 
-            trim: true
+            trim: true,
+            required: true,
+            unique:true
         },
         password: {
             type: String,

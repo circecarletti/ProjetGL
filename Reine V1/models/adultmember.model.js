@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
+const ChildMemberModel = require('../models/childmember.model');
+
 
 //adult member schema 
 const adultMemberSchema = new mongoose.Schema(
@@ -9,11 +11,13 @@ const adultMemberSchema = new mongoose.Schema(
             ref : "member",
             required: true
         },
-        _id: {
+        id: {
             type: String,
             validate: [isEmail],
             lowercase: true, 
-            trim: true
+            trim: true,
+            required: true,
+            unique:true
         },
         age: {
             type: Number,

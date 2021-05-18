@@ -10,11 +10,13 @@ const childMemberSchema = new mongoose.Schema(
             ref : "member",
             required: true
         },
-        _id: {
+        id: {
             type: String,
             validate: [isEmail],
             lowercase: true, 
-            trim: true
+            trim: true,
+            required: true,
+            unique:true
         },
         age: {
             type: Number,
@@ -24,8 +26,10 @@ const childMemberSchema = new mongoose.Schema(
             required: true
         },
         adultMember: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref : "member",
+            type: String,
+            validate: [isEmail],
+            lowercase: true, 
+            trim: true,
             required: true
         }
     }
