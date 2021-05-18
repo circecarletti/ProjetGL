@@ -25,7 +25,7 @@ const childMemberSchema = new mongoose.Schema(
         },
         adultMember: {
             type: mongoose.Schema.Types.ObjectId,
-            ref : "adultMember",
+            ref : "member",
             required: true
         }
     }
