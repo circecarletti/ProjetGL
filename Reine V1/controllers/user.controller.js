@@ -2,47 +2,49 @@ const AdultMemberModel = require('../models/adultMember.model');
 const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
 const ManagerModel = require('../models/manager.model');
-const { isEmail } = require('validator');
 
+var validator = require('validator');
 
 //informations user 
-module.exports.userInfo = (req, res) => {
-    console.log(req.params);
-    if(!((req.params.email).isEmail() && ((MemberModel.find({'email': req.params.email}).count() > 0) || (ManagerModel.find({'email': req.params.email}).count() > 0))))
-        return res.status(400).send('email unknown : ' + req.params.email)
+module.exports.userInfo = async (req, res) => {
+    const email = req.params._id;
+    //check if it is an email
+    if (!validator.isEmail(email)) 
+        return res.status(400).json({ message : 'not an email'});
+
+    //check if email is in the database
+    if(!(await MemberModel.exists({ _id: email}) || await ManagerModel.exists({ _id: email})))
+        return res.status(400).send('email not in database : ' + email);
     
-    if(AdultMemberModel.find({'email': req.params.email}).count() > 0 ){
-        console.log(AdultMemberModel.aggregate([
-            { 
-                $match: { email : req.params.email } },
-                { 
-                $lookup: { 
-                    from: 'members',
-                    localField: 'email',
-                    foreignField: 'email', 
-                    as: 'adult_member' } 
-                }
-            ]).pretty()/*.select('-password')*/ /*.where(email)*/).exec((err, result) => {
-                if (err) throw err;
-                console.log(result);
+    //adult email 
+    if(await AdultMemberModel.exists({_id: email})){
+         await AdultMemberModel.findOne({ _id : email}, 'childList _id age')
+            .populate('member', "-dateSubscription -password -nbFailConnection -_id -__v")  
+            .then(function(infomembers){
+                console.log('mail ' + email);
+                res.json(infomembers);
             })
-        
-        
-
-        //AdultMemberModel.findById()
-    }/*
-    else if(ChildMemberModel.find({'email': req.params.email}).count() > 0 ){
-
+            .catch(function(err) {
+                res.status(400).json({message : ' error email', err});
+            });
+    }
+    else if(await ChildMemberModel.exists({_id: email})){
+        await ChildMemberModel.findOne({ _id : email}, '-__v')
+            .populate('member', "-dateSubscription -password -nbFailConnection -_id -__v")   
+            .then(function(infomembers){
+                res.json(infomembers);
+            })
+            .catch(function(err) {
+                res.status(400).json({message : 'error email', err});
+            });
     }
     else { //email manager
-        MemberModel.findById(req.params.email, (err, docs) => {
-            if(!err) res.send(docs);
-            else console.log(err);
-        }).select('-password');
-
+        await ManagerModel.findOne({_id : email }, '-password -__v')
+            .then(function(infomanagers){
+                res.json(infomanagers);
+            })
+            .catch(function(err) {
+                res.status(400).json({message : 'error email', err});
+            });
     };
-
-*/
-
-
 };

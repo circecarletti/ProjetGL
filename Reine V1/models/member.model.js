@@ -5,12 +5,10 @@ const bcrypt = require('bcrypt');
 //member schema 
 const memberSchema = new mongoose.Schema(
     {   
-        email: {
+        _id: {
             type: String,
-            required: true,
             validate: [isEmail],
             lowercase: true, 
-            unique: true,
             trim: true
         },
         password: {
@@ -52,7 +50,9 @@ const memberSchema = new mongoose.Schema(
         },
         loan: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'loan'
+            ref: 'loan',
+            unique: true,
+            default: null
         },
         dateSubscription: {
             type: Date

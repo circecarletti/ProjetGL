@@ -13,5 +13,5 @@ router.post("/registerChild", authController.signUpChild);
 router.post("/registerManager", authController.signUpManager);
 
 //user display : 'block',
-router.get('/:email', userController.userInfo);
+router.get('/:_id', userController.userInfo);
 module.exports = router;

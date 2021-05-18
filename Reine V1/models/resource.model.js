@@ -3,18 +3,13 @@ const mongoose = require('mongoose');
 //ressource schema
 const resourceSchema = new mongoose.Schema(
     {
-        id: {
+        _id: {
             type: Number,
-            required: true,
-            unique: true,
             trim: true
         },
         idMember: {
-            type: String,
-            validate: [isEmail],
-            lowercase: true, 
-            unique: true,
-            trim: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref : "member"
         },
         title: {
             type: String,
