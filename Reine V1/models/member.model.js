@@ -52,8 +52,7 @@ const memberSchema = new mongoose.Schema(
         },
         loan: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'loan',
-            unique: true
+            ref: 'loan'
         },
         dateSubscription: {
             type: Date
@@ -71,14 +70,27 @@ const memberSchema = new mongoose.Schema(
     }
 );
 
+
 //password encryption with bcrypt
 //cryptage mdp
 memberSchema.pre("save", async function(next) {
-    //salage du mot de passe
+    const user = this;
+    //salage du mot de passe 
     const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(this.password, salt);
+    user.password = await bcrypt.hash(user.password, salt);
     next();
 });
+
+/*
+memberSchema.pre('findOneAndUpdate', async function() {
+    const docToUpdate = await this.model.findOne(this.getQuery())
+  
+    if (docToUpdate.password !== this._update.password) {
+      const newPassword = await hash(this._update.password, 10)
+      this._update.password = newPassword
+    }
+  })
+*/
 
 const MemberModel = mongoose.model('member', memberSchema);
 module.exports = MemberModel;

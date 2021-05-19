@@ -1,9 +1,8 @@
 const ResourceModel = require('../models/resource.model');
 
-
 module.exports.SearchByFilter = async (req, res) => {
     const { title, author, category, releaseDate, type } = req.body
-    
+
     var query = {};
     if(title) {
         if (!(title === "")) {

@@ -9,7 +9,8 @@ const adultMemberSchema = new mongoose.Schema(
         member: {
             type: mongoose.Schema.Types.ObjectId,
             ref : "member",
-            required: true
+            required: true, 
+            unique: true
         },
         id: {
             type: String,
