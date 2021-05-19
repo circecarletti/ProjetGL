@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 //ressource schema
 const resourceSchema = new mongoose.Schema(
     {
-        id: {
+        id: {//added directly by sequence (plugin Autoincrement)
             type: Number,
-            trim: true,
-            required: true,
-            unique:true
+            unique: true
         },
         idMember: {
             type: mongoose.Schema.Types.ObjectId,
@@ -54,6 +53,8 @@ const resourceSchema = new mongoose.Schema(
         },
     }
 )
+
+resourceSchema.plugin(AutoIncrement, {id: 'ressource_seq', inc_field: 'id'});
 
 const ResourceModel = mongoose.model('resource', resourceSchema);
 module.exports = ResourceModel;

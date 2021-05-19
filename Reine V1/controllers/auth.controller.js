@@ -14,12 +14,12 @@ module.exports.signUp = async (req, res) => {
         //verifiy id not in manager collection
         if (await ManagerModel.exists({ id: id}))
             return res.status(409).json({success: false, message: 'ID existed'}); 
-    
+        console.log('ok 1 ')
         //creating member 
-        const member = await MemberModel.create({id, password, name, firstName, balance});
-
+        const member = await MemberModel.create({id:id, password: password, name: name, firstName: firstName, balance: balance});
+        console.log('ok 3')
         //creating adultmember,  member included in adultmember
-        const user = await AdultMemberModel.create({ id, age, member}); 
+        const user = await AdultMemberModel.create({ id: id, age: age, member: member}); 
 
         const loan = await LoanModel.create({idAdherent: member._id});
         
@@ -32,12 +32,12 @@ module.exports.signUp = async (req, res) => {
         });
 
         console.log('Member successfully created!'); 
-        return res.status(201).json({ success: true, user: user._id }); 
+        return res.status(201).json({ success: true, user: user.id }); 
     }
     catch(err) {
-        if(err.code == 11000)
-            return res.status(409).json({ success: false, message: 'ID existed' , err});
-       else 
+        //if(err.code == 11000)
+        //    return res.status(409).json({ success: false, message: 'ID existed' , err});
+       //else 
             return res.status(400).send({ success: false, err });
     }
 }
@@ -82,7 +82,7 @@ module.exports.signUpChild = async (req, res) => {
                     } 
             });
             console.log('ChildMember successfully created!'); 
-            return res.status(201).json({success: true, user: user._id});
+            return res.status(201).json({success: true, user: user.id});
         } else 
             return res.status(404).send({success: false, message: 'Adultmember not found'});
     }
@@ -109,7 +109,7 @@ module.exports.signUpManager = async (req, res) => {
         //creating manager user
         const user = await ManagerModel.create({ id, password, name, firstName });
         console.log('Manager successfully created!'); 
-        return res.status(201).json({success: true, user: user._id}); 
+        return res.status(201).json({success: true, user: user.id}); 
     }
     catch(err) {
         if(err.code == 11000)
