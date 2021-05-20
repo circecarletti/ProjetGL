@@ -11,8 +11,8 @@
                     </slot>
                 </div>
                 <div class="action-area">
-                    <button type="button" @click="onClickOk">{{okLabel}}</button>
-                    <button type="button" @click="onClickCancel" v-if="cancelLabel">{{cancelLabel}}</button>
+                    <button class="delete-button" type="button" @click="onClickOk">{{okLabel}}</button>
+                    <button class="cancel-button" type="button" @click="onClickCancel" v-if="cancelLabel">{{cancelLabel}}</button>
                 </div>
             </div>
         </div>
@@ -152,9 +152,10 @@ export default {
     display: flex;
     width: 100%;
     height: 10%;
-    min-height: 2rem;
+    min-height: 1rem;
     border-bottom: solid 1px black;
-    text-align: center;
+    text-align: left;
+    text-indent: 20px;
 }
 
 .display-area {
@@ -178,5 +179,21 @@ export default {
     height: 15%;
     align-items: center;
     justify-content: space-between
+}
+
+.cancel-button{
+    margin-left: 2rem;
+    margin-right: 2rem;
+    background: #ECEBEB;
+    border: 1px solid #717171;
+    border-radius: 5px;
+}
+
+.delete-button{
+    margin-left: 2rem;
+    margin-right: 2rem;
+    background: #FF7D7D;
+    border: 2px solid #CB4141;
+    border-radius: 5px;
 }
 </style>
