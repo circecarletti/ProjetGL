@@ -36,5 +36,5 @@ const childMemberSchema = new mongoose.Schema(
     }
 )
 
-const ChildMemberModel = mongoose.model('childMember', childMemberSchema);
+const ChildMemberModel = mongoose.model('childmember', childMemberSchema);
 module.exports = ChildMemberModel;  

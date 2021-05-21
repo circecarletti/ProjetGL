@@ -33,6 +33,14 @@ const managerSchema = new mongoose.Schema(
             maxlength: 30, 
             minlength: 3,
             trim: true
+        },
+        statut: {
+            type: String,
+            default: 'manager'
+        },
+        picture: {
+            type: String,
+            default: "./upoads/profil/random-user.png"
         }
     }
 )
@@ -45,6 +53,20 @@ managerSchema.pre("save", async function(next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
+
+//function (decrypt password) to test if password send is equal to password in the database
+managerSchema.statics.login = async function(email, password) {
+    const user = await this.findOne({ id: email });
+
+    if(user){
+        const auth = await bcrypt.compare(password, user.password);
+        if(auth){
+            return user;
+        }
+        throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
+};
 
 const ManagerModel = mongoose.model('manager', managerSchema);
 module.exports = ManagerModel;

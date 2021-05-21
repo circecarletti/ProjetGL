@@ -4,7 +4,7 @@ const AutoIncrement = require('mongoose-sequence')(mongoose);
 //ressource schema
 const resourceSchema = new mongoose.Schema(
     {
-        id: {//added directly by sequence (plugin Autoincrement)
+        id: {//added directly by sequence (plugin Autoincrement) //require indirectly by plugin sequence
             type: Number,
             unique: true
         },
@@ -51,9 +51,14 @@ const resourceSchema = new mongoose.Schema(
             max: 2021,
             required: true
         },
+        picture: {
+            type: String,
+            default: "./upoads/profil/random-user.png"
+        }
     }
 )
 
+//plugin mongoose sequence 
 resourceSchema.plugin(AutoIncrement, {id: 'ressource_seq', inc_field: 'id'});
 
 const ResourceModel = mongoose.model('resource', resourceSchema);

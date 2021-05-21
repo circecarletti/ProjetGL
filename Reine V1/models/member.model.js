@@ -66,6 +66,14 @@ const memberSchema = new mongoose.Schema(
         subscribe: {
             type: Boolean, 
             default: false
+        },
+        statut: {
+            type: String,          
+            enum: ['adultmember', 'childmember']
+        },
+        picture: {
+            type: String,
+            default: "./upoads/profil/random-user.png"
         }
     }
 );
@@ -80,6 +88,21 @@ memberSchema.pre("save", async function(next) {
     user.password = await bcrypt.hash(user.password, salt);
     next();
 });
+
+//function (decrypt password) to test if password send is equal to password in the database
+memberSchema.statics.login = async function(email, password) {
+    const user = await this.findOne({ id: email }); //find user with email
+
+    if(user){ //if user exist 
+        const auth = await bcrypt.compare(password, user.password); //bcrypt compare password crypted with password send
+        if(auth){ 
+            return user; //password ok
+        }
+        throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
+};
+
 
 /*
 memberSchema.pre('findOneAndUpdate', async function() {

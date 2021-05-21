@@ -26,9 +26,9 @@ const adultMemberSchema = new mongoose.Schema(
             max: 100,
             required: true
         },
-        childList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'childMember', default: null}]
+        childList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'childmember', default: null}]
     }
 )
 
-const AdultMemberModel = mongoose.model('adultMember', adultMemberSchema);
+const AdultMemberModel = mongoose.model('adultmember', adultMemberSchema);
 module.exports = AdultMemberModel; 
