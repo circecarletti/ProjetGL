@@ -27,7 +27,6 @@ module.exports.checkAuth = async (req, res, next) => {
                 next();      
             }
             else {
-                res.locals.user = null;
                 res.cookie('jwt', '', { maxAge:1 });
                 res.json({ success: false, message: "error verify user", statut:''}); 
             }
@@ -35,6 +34,5 @@ module.exports.checkAuth = async (req, res, next) => {
     } else {
         console.log('No token');
         res.json({ success: false, message: "no token"}); 
-        res.locals.user = null;
     }
 };

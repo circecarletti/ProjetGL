@@ -15,20 +15,19 @@ module.exports.userInfo = async (req, res) => {
     try {
         //adult  
         await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
-            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
-            .then(function(docs){
-                console.log('mail ' + email);
-                return res.json({success: true, message:'get user info', docs});
-            })
-            .catch(function(err) {
-                return res.json({success: false, message : ' error email', err});
+            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")
+            .populate('childList')
+            .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get info adultmember', err});
+                }
+                res.json({success: true, message:'success get user info', docs});
             });
     }catch(err){
         console.log(err);
         return res.json({success: false, message : ' error get info adultmember', err});
     }
 };
-
 
 //signup childmember
 //fonction creerCompteMineur

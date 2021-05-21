@@ -5,7 +5,6 @@ const ManagerModel = require('../models/manager.model');
 const LoanModel = require('../models/loan.model');
 const jwt = require('jsonwebtoken');
 
-
 const maxAge = 3 * 24 * 60 * 60 * 1000 // 3 day in milliseconds
 //create token (jeton) for authentification check
 const createToken = (id) => {
@@ -66,18 +65,18 @@ module.exports.signIn = async (req, res) => {
     try{
         //if email is a member 
         if(await MemberModel.exists({ id: id})) {
-            const userblock = await MemberModel.findOne({id: id}).select('block nbFailConnection -_id');
+            const userpb = await MemberModel.findOne({id: id}).select('block nbFailConnection id -_id');
             //check if user is block
-            if(userblock.block) {
+            if(userpb.block || userpb.nbFailConnection == 10) {
                 return res.json({success: false, message: 'user is block please contact manager'});
             }
             //login
-            const user = await MemberModel.login(id, password);
+            const usermember = await MemberModel.login(id, password);
             //create token for authentification
-            const token = createToken(user.id);
+            const token = createToken(usermember.id);
             //create cookie with token
             res.cookie('jwt', token, {httpOnly: true, maxAge}); // create a cookie 
-            res.json({success: true, message: 'authentification success', user:user.id, token:token, statut: user.statut}); //succes auth
+            res.json({success: true, message: 'authentification success', user:usermember.id, token:token, statut: usermember.statut}); //succes auth
         }
         else if (await ManagerModel.exists({ id: id})){
             //email is a manager 
@@ -97,8 +96,39 @@ module.exports.signIn = async (req, res) => {
         if(err.message.includes('email')) {
             res.json({ success: false, message: 'email unknow', err});
         } else if(err.message.includes('password')) {
+            //password incorrect
+            //if it is an incorrect password and it is a member increment nbFailConnection
+            if (await MemberModel.exists({id: id})){
+                const userpb = await MemberModel.findOne({id: id}).select('block nbFailConnection id -_id');
+                if ((userpb.nbFailConnection == 9)){
+                    MemberModel.updateOne(
+                        { id: id }, 
+                        {
+                            $inc: { nbFailConnection: 1 },
+                            $set: { block: true }
+                        }, {upsert: true}, function(err) {
+                            if(err)
+                                console.log(err)
+                        })
+                        return res.json({ success: false, message: 'password incorrect user block attempt connexion 10 ', err});
+                }else {
+                    MemberModel.updateOne(
+                        { id: userpb.id }, 
+                        {
+                            $inc: {
+                                nbFailConnection: 1
+                            }
+                        },
+                        {upsert: true}, function(err) {
+                            if(err)
+                                console.log(err)
+                        });
+                    console.log("ok else")
+                    return res.json({ success: false, message: 'password incorrect', err});
+                }
+            }
             res.json({ success: false, message: 'password incorrect', err});
-        }else {
+        } else {
             res.json({ success: false, message: 'error sign in', err});
         }
     }

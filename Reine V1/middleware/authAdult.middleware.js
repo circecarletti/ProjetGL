@@ -9,28 +9,20 @@ module.exports.checkAdultMember = async (req, res, next) => {
         //verify token cookie 
         jwt.verify(token, process.env.TOKEN_SECRET, async (err, decodedToken) => {
             if(err){
-                //delete cookie 
-                res.locals.user = null;
-                res.cookie('jwt', '', { maxAge:1 });
                 res.json({success:false, message: 'error verify token'});
             } else {
                 //if decoded token id is adult member
                 if(!(await AdultMemberModel.exists({ id: decodedToken.id}))) {
                     //token is not adult member delete locals temporary locals parameters
-                    res.locals.user = null;
                     res.json({success:false, message: 'error statut'});
                 }
                 console.log('decoded token ' + decodedToken)
-                const user = await AdultMemberModel.findOne({id: decodedToken.id});
-                res.locals.user = user;
-                console.log(res.locals.user);
                 res.json({ success: true, message: "success verify adultmember"}); 
                 next();
             }
         })
     } else {
         //no token existed
-        res.locals.user = null;
         res.json({success:false, message: 'no token'});
     }
 }
@@ -44,9 +36,12 @@ module.exports.requireAuthAdult = (req, res, next) => {
         jwt.verify(token, process.env.TOKEN_SECRET, async (err, decodedToken) => {
             if(err) {
                 console.log(err);
+                //delete cookie
+                res.cookie('jwt', '', { maxAge:1 });
                 res.json({success:false, message: 'error verify token'});
             }else if(!(await AdultMemberModel.exists({ id: decodedToken.id}))) {
                 console.log(err);
+                res.cookie('jwt', '', { maxAge:1 });
                 res.json({success:false, message: 'error statut'});
             } else {
                 console.log(decodedToken.id);

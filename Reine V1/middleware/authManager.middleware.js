@@ -45,9 +45,13 @@ module.exports.requireAuthManager = async (req, res, next) => {
         jwt.verify(token, process.env.TOKEN_SECRET, async (err, decodedToken) => {
             if(err) {
                 console.log(err);
+                //delete cookie
+                res.cookie('jwt', '', { maxAge:1 });                
                 res.json({success:false, message: 'error verify token'});
             } else if(!(await ManagerModel.exists({ id: decodedToken.id}))) {
                 console.log(err);
+                //delete cookie
+                res.cookie('jwt', '', { maxAge:1 });
                 res.json({success:false, message: 'error statut'});
             } else {
                 console.log(decodedToken.id);
