@@ -13,7 +13,8 @@ require('./config/db.js');
 const {checkAdultMember, requireAuthAdult} = require('./middleware/authAdult.middleware');
 const {checkChildMember, requireAuthChild} = require('./middleware/authChild.middleware');
 const {checkManager, requireAuthManager} = require('./middleware/authManager.middleware');
-const {requireAuth} = require('./middleware/auth.middleware');
+const {checkAuth} = require('./middleware/auth.middleware');
+
 const cors = require('cors');
 const app = express();
 
@@ -40,20 +41,32 @@ app.get('/', (req, res) => {
     res.json({ msg: "Hello on est dans l'api"});
 });
 
+//require authentification for adult
+app.get('/jwtid', checkAuth);
+
+//require authentification for adult
+app.get('/jwtidAdult', requireAuthAdult);
+
+//require authentification for child
+app.get('/jwtidChild', requireAuthChild);
+
+
+//require authentification for manager
+app.get('/jwtidManager', requireAuthManager, (req, res) => {
+    res.send(res.locals.user.id);
+});
+
+
 //middleware jwt to verify auth user 
 //launch middleware auth adult if route is 
-app.get('/api/user/adultmember', checkAdultMember);
+app.get('/api/user/adultmember/*', checkAdultMember);
 
 //launch middleware auth child if route is 
-app.get('/api/user/childmember', checkChildMember);
+app.get('/api/user/childmember/*', checkChildMember);
 
 //launch middleware auth child if route is 
-app.get('/api/user/manager', checkManager);
+app.get('/api/user/manager/*', checkManager);
 
-//require authentification for all users
-app.get('/jwtid', requireAuth, (req, res) => {
-    res.status(200).send(res.locals.user.id);
-});
 
 //routes
 //routes user

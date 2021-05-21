@@ -10,38 +10,38 @@ module.exports.userInfo = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email}) || await ManagerModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     //adult  
     if(await AdultMemberModel.exists({id: email})){
          await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
             .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
-            .then(function(infomembers){
+            .then(function(docs){
                 console.log('mail ' + email);
-                return res.status(200).json(infomembers);
+                return res.json({success: true, message: 'success get user info',docs});
             })
             .catch(function(err) {
-                return res.status(400).json({success: true, message : ' error email', err});
+                return res.json({success: true, message : 'error email', err});
             });
     }
     //child
     else if(await ChildMemberModel.exists({id: email})){
         await ChildMemberModel.findOne({ id : email}, '-__v -_id')
             .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")   
-            .then(function(infomembers){
-                return res.status(200).json(infomembers);
+            .then(function(docs){
+                return res.json({success:true, message:'success get user info', docs});
             })
             .catch(function(err) {
-                return res.status(400).json({success: true, message : 'error email', err});
+                return res.json({success: true, message : 'error email', err});
             });
     }
     else { // manager
         await ManagerModel.findOne({id : email }, '-password -__v -_id')
-            .then(function(infomanagers){
-                return res.status(200).json(infomanagers);
+            .then(function(docs){
+                return res.json({success:true, message: 'success get info', docs});
             })
             .catch(function(err) {
-                return res.status(400).json({success : false, message : 'error email', err});
+                return res.json({success : false, message : 'error email', err});
             });
     };
 };
@@ -54,7 +54,7 @@ module.exports.modifyBalance = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.updateOne(
@@ -66,12 +66,12 @@ module.exports.modifyBalance = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "account not fund",  err});
+                    if(err) return res.json({success: false, message: "account not fund",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "account fund"}); 
+            return res.json({ success: true, message: "account fund"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "account not fund", err});
+        return res.json({success: false, message: "error account not fund", err});
    }
 };
 
@@ -83,7 +83,7 @@ module.exports.updateName = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -96,13 +96,13 @@ module.exports.updateName = async (req, res) => {
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
                     if(err) {
-                        return res.status(500).json({success: false, message: "Name not modified",  err});
+                        return res.json({success: false, message: "Name not modified",  err});
                     }
                 }
             );
-        return res.status(201).json({ success: true, message: "name modified"}); 
+        return res.json({ success: true, message: "name modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "name not modified", err});
+        return res.json({success: false, message: "error name not modified", err});
    }
 };
 
@@ -113,7 +113,7 @@ module.exports.updateFirstName = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -125,12 +125,12 @@ module.exports.updateFirstName = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "firstName not modified",  err});
+                    if(err) return res.json({success: false, message: "firstName not modified",  err});
                 }
             );
-        return res.status(201).json({ success: true, message: "firstName modified"}); 
+        return res.json({ success: true, message: "firstName modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "firstName not modified", err});
+        return res.json({success: false, message: "error firstName not modified", err});
    }
 };
 
@@ -141,7 +141,7 @@ module.exports.updateAge = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         //adult member
@@ -155,10 +155,10 @@ module.exports.updateAge = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "age not modified",  err});
+                    if(err) return res.json({success: false, message: "age not modified",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "age modified"}); 
+            return res.json({ success: true, message: "age modified"}); 
         }else {
             //child member
             ChildMemberModel.findOneAndUpdate(
@@ -170,13 +170,13 @@ module.exports.updateAge = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "age not modified",  err});
+                    if(err) return res.json({success: false, message: "age not modified",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "age modified"}); 
+            return res.json({ success: true, message: "age modified"}); 
         }
     } catch (err) {
-        return res.status(500).json({success: false, message: "age not modified", err});
+        return res.json({success: false, message: "age not modified", err});
    }
 };
 
@@ -187,13 +187,13 @@ module.exports.unlockMember = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         const lock = await MemberModel.findOne({id: email}).select('block -_id');
         console.log(lock);
         if(!lock.lock) 
-            return res.status(400).json({status: false, message: 'member not lock'});
+            return res.json({success: false, message: 'member not lock'});
         
         MemberModel.updateOne(
                 {id: email}, 
@@ -211,9 +211,9 @@ module.exports.unlockMember = async (req, res) => {
                     }
                 }
             )
-        return res.status(201).json({ success: true, message: "member unlock"}); 
+        return res.json({ success: true, message: "member unlock"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "member not unlocked", err});
+        return res.json({success: false, message: "member not unlocked", err});
    }
 };
 
@@ -230,10 +230,10 @@ module.exports.createResource = async (req, res) => {
     try {
         const resource = await newResource.save();
         console.log(resource)
-        return res.status(201).json({success: true, messaege:'resource created', id: resource.id}); 
+        return res.json({success: true, message:'resource created', id: resource.id}); 
     }
     catch(err) {
-        return res.status(400).json({ success: false, message: 'error creating resource', err });
+        return res.json({ success: false, message: 'error creating resource', err });
     }
 }
 
@@ -245,7 +245,7 @@ module.exports.modifyBalance = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.updateOne(
@@ -257,12 +257,12 @@ module.exports.modifyBalance = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "account not fund",  err});
+                    if(err) return res.json({success: false, message: "account not fund",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "account fund"}); 
+            return res.json({ success: true, message: "account fund"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "account not fund", err});
+        return res.json({success: false, message: "error account not fund", err});
    }
 };
 
@@ -272,14 +272,14 @@ module.exports.deleteUser = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         //verify if member is lock
         const lock = await MemberModel.findOne({id: email}).select('block -_id');
         console.log(lock);
         if(lock.lock) 
-            return res.status(400).json({status: false, message: 'member not delete member is lock'});
+            return res.json({success: false, message: 'member not delete member is lock'});
 
         const id = await MemberModel.findOne({id: email}).select('_id');
         await LoanModel.remove({idAdherent: id._id}).exec();  //remove loan associate to member
@@ -290,9 +290,9 @@ module.exports.deleteUser = async (req, res) => {
         }else {
             await ChildMemberModel.remove({id: email}).exec();  //remove child  member
         }
-        return res.status(200).json({ success: true, message: "member deleted"}); 
+        return res.json({ success: true, message: "member deleted"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "error deleting member", err});
+        return res.json({success: false, message: "error deleting member", err});
    }
 };
 
@@ -303,7 +303,7 @@ module.exports.updatePassword = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -322,9 +322,9 @@ module.exports.updatePassword = async (req, res) => {
                     }
                 }
             )
-        return res.status(201).json({ success: true, message: "password modified"}); 
+        return res.json({ success: true, message: "password modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "password not modified", err});
+        return res.json({success: false, message: "password not modified", err});
    }
 };
 
@@ -337,7 +337,7 @@ module.exports.rentResource = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         Order.findOne({'_id' : id})
@@ -365,8 +365,8 @@ module.exports.rentResource = async (req, res) => {
                     }
                 }
             )
-        return res.status(201).json({ success: true, message: "password modified"}); 
+        return res.json({ success: true, message: "password modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "password not modified", err});
+        return res.json({success: false, message: "password not modified", err});
    }
 };

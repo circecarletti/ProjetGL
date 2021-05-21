@@ -1,6 +1,8 @@
 const AdultMemberModel = require('../models/adultmember.model');
 const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
+const ManagerModel = require('../models/manager.model');
+const LoanModel = require('../models/loan.model');
 
 
 //informations user 
@@ -9,18 +11,22 @@ module.exports.userInfo = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
-    
-    //adult  
-    await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
-        .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
-        .then(function(infomembers){
-            console.log('mail ' + email);
-            return res.status(200).json(infomembers);
-        })
-        .catch(function(err) {
-            return res.status(400).json({success: true, message : ' error email', err});
-        });
+        return res.json({success:false, message:'email not in database'});
+    try {
+        //adult  
+        await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
+            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
+            .then(function(docs){
+                console.log('mail ' + email);
+                return res.json({success: true, message:'get user info', docs});
+            })
+            .catch(function(err) {
+                return res.json({success: false, message : ' error email', err});
+            });
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, message : ' error get info adultmember', err});
+    }
 };
 
 
@@ -32,7 +38,7 @@ module.exports.signUpChild = async (req, res) => {
     try {
         //verifiy id not in manager collection
         if (await ManagerModel.exists({ id: id}))
-            return res.status(409).json({success: false, message: 'ID manager existed'}); 
+            return res.json({success: false, message: 'ID manager existed'}); 
 
         //check existence of adultmember
         const userExists = await AdultMemberModel.exists({ id : adultMember }); 
@@ -64,17 +70,19 @@ module.exports.signUpChild = async (req, res) => {
                     } 
             });
             console.log('ChildMember successfully created!'); 
-            return res.status(201).json({success: true, user: user.id});
+            return res.json({success: true, user: user.id});
         } else 
-            return res.status(404).json({success: false, message: 'Adultmember not found'});
+            return res.json({success: false, message: 'Adultmember not found'});
     }
     catch(err) {
         if(err.code == 11000){
             console.log(err)
-            return res.status(409).json({success: false, message: 'ID existed', err});
+            return res.json({success: false, message: 'ID existed', err});
         }
-        else 
-            return res.status(400).json({success: false, err });
+        else {
+            console.log(err);
+            return res.json({success: false, message:'error signup child', err });
+        }
     }
 }
 
@@ -85,7 +93,7 @@ module.exports.fundAccount = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.updateOne(
@@ -97,12 +105,13 @@ module.exports.fundAccount = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "account not fund",  err});
+                    if(err) return res.json({success: false, message: "account not fund",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "account fund"}); 
+            return res.json({ success: true, message: "account fund"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "account not fund", err});
+        console.log(err);
+        return res.json({success: false, message: "error account not fund", err});
    }
 };
 
@@ -114,7 +123,7 @@ module.exports.updateName = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -127,13 +136,13 @@ module.exports.updateName = async (req, res) => {
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
                     if(err) {
-                        return res.status(500).json({success: false, message: "Name not modified",  err});
+                        return res.json({success: false, message: "Name not modified",  err});
                     }
                 }
             );
-        return res.status(201).json({ success: true, message: "name modified"}); 
+        return res.json({ success: true, message: "name modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "name not modified", err});
+        return res.json({success: false, message: "name not modified", err});
    }
 };
 
@@ -144,7 +153,7 @@ module.exports.updateFirstName = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -156,12 +165,12 @@ module.exports.updateFirstName = async (req, res) => {
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "firstName not modified",  err});
+                    if(err) return res.json({success: false, message: "firstName not modified",  err});
                 }
             );
-        return res.status(201).json({ success: true, message: "firstName modified"}); 
+        return res.json({success: true, message: "firstName modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "firstName not modified", err});
+        return res.json({success: false, message: "error firstName not modified", err});
    }
 };
 
@@ -172,7 +181,7 @@ module.exports.updateAge = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         //adult member
@@ -185,12 +194,12 @@ module.exports.updateAge = async (req, res) => {
             },
             { new: true, upsert: true, setDefaultsOnInsert: true},
             (err,docs) => {
-                if(err) return res.status(500).json({success: false, message: "age not modified",  err});
+                if(err) return res.json({success: false, message: "age not modified",  err});
             }
         );
-        return res.status(201).json({ success: true, message: "age modified"}); 
+        return res.json({ success: true, message: "age modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "age not modified", err});
+        return res.json({success: false, message: "error age not modified", err});
    }
 };
 
@@ -202,11 +211,11 @@ module.exports.fundChildAccount = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     //check if email is in the database
     if(!(await ChildMemberModel.exists({ id: idChild})))
-        return res.status(400).json({success:'false', message: 'child account does not exist'});
+        return res.json({success:'false', message: 'child account does not exist'});
 
     try {
         MemberModel.updateOne(
@@ -217,12 +226,12 @@ module.exports.fundChildAccount = async (req, res) => {
                     }
                 },
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "child account not fund",  err});
+                    if(err) return res.json({success: false, message: "child account not fund",  err});
                 }
             )
-        return res.status(201).json({ success: true, message: "child account fund"});
+        return res.json({ success: true, message: "child account fund"});
     } catch (err) {
-        return res.status(500).json({success: false, message: "child account not fund", err});
+        return res.json({success: false, message: "error child account not fund", err});
     }
 };
 
@@ -233,7 +242,7 @@ module.exports.buyMembership = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         const balance = await MemberModel.findOne({id: email}).select('balance -_id');
@@ -252,15 +261,15 @@ module.exports.buyMembership = async (req, res) => {
                 },
                 { new: true, upsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({succes: false, message: "membership not purchased",  err});
+                    if(err) return res.json({succes: false, message: "membership not purchased",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "membership purchased"});
+            return res.json({ success: true, message: "membership purchased"});
         }else {
-            return res.status(400).json({success: false, message: "insufficient balance"});
+            return res.json({success: false, message: "insufficient balance"});
         }
     } catch (err) {
-        return res.status(500).json({success: false, message: "membership not purchased", err});
+        return res.json({success: false, message: "error membership not purchased", err});
     }
 };
 
@@ -271,7 +280,7 @@ module.exports.updatePassword = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         MemberModel.findOneAndUpdate(
@@ -290,9 +299,9 @@ module.exports.updatePassword = async (req, res) => {
                     }
                 }
             )
-        return res.status(201).json({ success: true, message: "password modified"}); 
+        return res.json({ success: true, message: "password modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "password not modified", err});
+        return res.json({success: false, message: "error password not modified", err});
    }
 };
 
@@ -304,7 +313,7 @@ module.exports.rentResource = async (req, res) => {
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         Order.findOne({'_id' : id})
@@ -312,8 +321,6 @@ module.exports.rentResource = async (req, res) => {
         .exec(function(err, order) {
           //
         });
-    
-        
         if(MemberModel)
 
         await MemberModel.findOneAndUpdate(
@@ -332,9 +339,9 @@ module.exports.rentResource = async (req, res) => {
                     }
                 }
             )
-        return res.status(201).json({ success: true, message: "password modified"}); 
+        return res.json({ success: true, message: "password modified"}); 
     } catch (err) {
-        return res.status(500).json({success: false, message: "password not modified", err});
+        return res.json({success: false, message: "error password not modified", err});
    }
 };
 
@@ -346,7 +353,7 @@ module.exports.renewMembership = async (req, res) => {
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
-        return res.status(400).json('email not in database : ' + email);
+        return res.json({success:false, message:'email not in database'});
     
     try {
         const balance = await MemberModel.findOne({id: email}).select('balance -_id');
@@ -365,15 +372,15 @@ module.exports.renewMembership = async (req, res) => {
                 },
                 { new: true, upsert: true},
                 (err,docs) => {
-                    if(err) return res.status(500).json({success: false, message: "membership not purchased",  err});
+                    if(err) return res.json({success: false, message: "membership not purchased",  err});
                 }
             );
-            return res.status(201).json({ success: true, message: "membership purchased"});
+            return res.json({ success: true, message: "membership purchased"});
         }else {
-            return res.status(400).json({success: false, message: "insufficient balance"});
+            return res.json({success: false, message: "insufficient balance"});
         }
     } catch (err) {
-        return res.status(500).json({success: false, message: "membership not purchased", err});
+        return res.json({success: false, message: "error membership not purchased", err});
     }
 };*/
 

@@ -2,11 +2,11 @@ const ResourceModel = require('../models/resource.model');
 
 //get resources
 module.exports.getResources = async (req, res) => {
-
     //if no query send with get 
     if (((req.query === {}) || (req.query.name === undefined ))) {
-        return res.status(500).send({success: false, message : 'error resources'});
+        return res.send({success: false, message: 'error resources'});
     }
+    
     const name = req.query.name;
     console.log(name)
 
@@ -21,17 +21,17 @@ module.exports.getResources = async (req, res) => {
 
         await ResourceModel.find(query,'-_id -__v', function(err, docs) {
             if(err){
-                return res.status(400).send({success: false, message : 'error resources', err});
+                return res.send({success: false, message : 'error resources', err});
             }
             if (docs.length){
-                return res.status(200).send({success: true, docs});
+                return res.send({success: true,message:'success get ressource' , docs});
             } else {
-                return res.status(400).send({success: false, message : 'resources not found', err});
+                return res.send({success: false, message : 'resources not found', err});
             }
         });
     }
     catch(err){
-        return res.status(400).send({ success: false, message: "error resources"}); 
+        return res.send({ success: false, message: "error get resources"}); 
     }
 };
 
@@ -40,25 +40,25 @@ module.exports.getResources = async (req, res) => {
 module.exports.getResourceByID = async (req, res) => {
     const id = req.params.id;
     //if no query send with get 
-    if (!(await ResourceModel.exists({id: id}))) {
-        return res.status(500).json({success: false, message : 'error id resource'});
-    }
+    if (!(await ResourceModel.exists({id: id})))
+        return res.json({success: false, message : 'error id resource'});
+
 
     try {
         console.log(id)
         await ResourceModel.findOne({id: id},'-_id -__v', function(err, docs) {
             if(err){
-                return res.status(400).json({success: false, message : 'error get resource', err});
+                return res.json({success: false, message : 'error get resource', err});
             }
             if (docs){
-                return res.status(200).json({success: true, docs});
+                return res.json({success: true, message:'success get resource', docs});
             } else {
-                return res.status(400).json({success: false, message : 'error get resource by id', err});
+                return res.json({success: false, message : 'error get resource by id', err});
             }
         });
     }
     catch(err){
-        return res.status(400).json({ success: false, message: "error get resource by id"}); 
+        return res.json({ success: false, message: "error get resource by id"}); 
     }
 };
 
@@ -66,7 +66,7 @@ module.exports.getResourceByID = async (req, res) => {
 module.exports.SearchByFilter = async (req, res) => {
 
     if (req.query === {}) {
-        return res.status(500).json({success: false, message : 'error params'});
+        return res.json({success: false, message : 'error params'});
     }
 
     const { title, author, category, releaseDate, type } = req.query
@@ -104,15 +104,15 @@ module.exports.SearchByFilter = async (req, res) => {
     try {
         await ResourceModel.find(query,'-_id -__v',function(err, docs){
             if(err){
-                return res.status(400).json({success: false, message : 'error search by filter ressources', err});
+                return res.json({success: false, message : 'error search by filter ressources', err});
             }
             if (docs.length){
-                return res.status(200).json({success: true, docs});
+                return res.json({success: true, message:'success search by filter', docs});
             } else {
-                return res.status(400).json({success: false, message : 'ressources not found', err});
+                return res.json({success: false, message : 'ressources not found', err});
             }
         });
     } catch(err) {
-        return res.status(400).json({ success: false, message: "search by filter resources"}); 
+        return res.json({ success: false, message: "search by filter resources"}); 
     }
 };
