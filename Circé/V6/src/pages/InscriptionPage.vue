@@ -144,7 +144,14 @@ export default {
                 passwordConfirm: this.passwordConfirm
             };
 
-            sendPost('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/customers.json', newCustomer).
+            sendPost('https://orsaymediatheque.herokuapp.com/api/users/register', {
+                                                                                        id : newCustomer.email,
+                                                                                        password : newCustomer.password,
+                                                                                        name : newCustomer.lastName,
+                                                                                        firstName : newCustomer.firstName,
+                                                                                        age : newCustomer.age,
+                                                                                        balance : 0
+                                                                                    }).
                 then( response => {
                     console.log(response);
                     openModal(this, 'theModalSuccess', `Votre inscription s'est correctement déroulée.`)
@@ -156,27 +163,33 @@ export default {
                 });
         }
     },
+
+
     watch: {
         lastName() {
             manageValidityMessage(
                 this.lastNameElement,
                 `Le nom est obligatoire et ne doit pas comporter d'espace avant ou après.`);
         },
+        
         firstName() {
             manageValidityMessage(
                 this.firstNameElement,
                 `Le prénom est obligatoire et ne doit pas comporter d'espace avant ou après.`);
         },
+
         age() {
             manageValidityMessage(
                 this.ageElement,
                 `L'age est obligatoire et doit être un entier positif.`);
         },
+
         email() {
             manageValidityMessage(
                 this.emailElement,
                 `L'email est obligatoire et doit être au bon format.`);
         },
+
         password(newValue) {
             if (newValue === '' || newValue !== this.passwordConfirm) {
                 this.passportElement.setCustomValidity(`Le mot de passe est obligatoire et doit être égal à sa confirmation.`);
@@ -185,6 +198,7 @@ export default {
                 this.passwordConfirmElement.setCustomValidity(``);
             }
         },
+
         passwordConfirm(newValue) {
             if (newValue === '' || newValue !== this.password) {
                 this.passwordConfirmElement.

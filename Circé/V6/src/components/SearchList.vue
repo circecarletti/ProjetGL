@@ -1,15 +1,18 @@
 <template>
     <div class="searchListArea" v-if="!searching">
+        <!-- <div class="empty-result" v-if="noResult">
+            <label><h3>Aucun resultats</h3></label>
+        </div> -->
         <div class="line" v-for="(anItem, index) in result" :key="anItem" @click="onSelect(index)">
             <div class="image-area">
-                <img :src="'/' + anItem.url" class="image">
+                <!-- <img :src="'/' + anItem.url" class="image"> -->
             </div>
             <div class="text-area">
                 <div class="title">
-                    {{anItem.titre}}
+                    {{anItem.title}}
                 </div>
                 <div class="author">
-                    {{anItem.auteur}}, {{anItem.annee}}
+                    {{anItem.author}}, {{anItem.releaseDate}}
                 </div>
                 <div class="technical">
                     <div class="item-type">{{anItem.type}}</div>
@@ -44,6 +47,12 @@ export default {
     },
 
     emits: ['searchOver'],
+
+    computed: {
+        noResult(){
+            return this.result===[];
+        }
+    },
 
     data() {
         return {
@@ -81,30 +90,13 @@ export default {
             }
         },
         
-        simpleSearch(titleOrAUthor) {
-            // Ici, l'appel retourne toute la base (elle est trèèèèèèèèès petite) et on
-            // filtre dans le front.
-            // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-            // de filtrer les donnnées en fonction de l'appel reçu.
-            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', {title : titleOrAUthor}).
+        simpleSearch(titleOrAuthor) {
+            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: titleOrAuthor}]).
                 then( response => {
-                    // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                    // QUE les nouveautés.
-                    // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                    // de filtrer les donnnées en fonction de l'appel reçu.
-                    // if (titleOrAUthor.trim() !== '') {
-                    //     const regEx = new RegExp(titleOrAUthor.trim(), 'gi');
-                    //     this.result = response.filter( anItem => {
-                    //         const indexSearchAuthor = anItem.auteur.search(regEx);
-                    //         const indexSearchtitle = anItem.titre.search(regEx);
-                    //         return indexSearchAuthor > -1 || indexSearchtitle > -1 ;
-                    //     } );
-                    // } else {
-                    //     // Pas de filtre
                     if(response.success){
-                        this.result = response;
+                        this.result = response.docs;
                     }else{
-                        console.log("Error : La recherche simple est un échec.")
+                        console.log("erreur : ", response.message);
                         this.result = [];
                     }
                     this.dataError = false;
@@ -116,14 +108,10 @@ export default {
                     this.searching = false;
                     this.$emit('searchOver', true);
                     console.error(error);
-                })
+                });
         },
 
         advancedSearch(criteriaObject) {
-            // Ici, l'appel retourne toute la base (elle est trèèèèèèèèès petite) et on
-            // filtre dans le front.
-            // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-            // de filtrer les donnnées en fonction de l'appel reçu.
             console.log({
                             title : criteriaObject.title,
                             author : criteriaObject.author,
@@ -139,36 +127,8 @@ export default {
                                                                                             type : criteriaObject.types
                                                                                         }).
                 then( response => {
-                    // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                    // QUE les nouveautés.
-                    // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                    // de filtrer les donnnées en fonction de l'appel reçu.
                     if(response.success){
-                        this.result = response.docs;//.filter( anItem => {
-                    //     let check = true;
-                    //     if (typeof criteriaObject.title === 'string') {
-                    //         check = check && 
-                    //             anItem.titre.search(new RegExp(criteriaObject.title.trim(), 'gi')) > -1;
-                    //     }
-                    //     if (typeof criteriaObject.author === 'string') {
-                    //         check = check && 
-                    //             anItem.auteur.search(new RegExp(criteriaObject.author.trim(), 'gi')) > -1;
-                    //     }
-                    //     if (Number.isInteger(criteriaObject.releaseDate)) {
-                    //         check = check && 
-                    //             anItem.annee === criteriaObject.releaseDate;
-                    //     }
-                    //     if (typeof criteriaObject.available === 'boolean') {
-                    //         check = check && anItem.disponible === criteriaObject.available;
-                    //     }
-                    //     if (Array.isArray(criteriaObject.categories) && criteriaObject.categories.length > 0) {
-                    //         check = check && criteriaObject.categories.includes(anItem.categorie);
-                    //     }
-                    //     if (Array.isArray(criteriaObject.types) && criteriaObject.types.length > 0) {
-                    //         check = check && criteriaObject.types.includes(anItem.type);
-                    //     }
-                    //     return check;
-                    // } );
+                        this.result = response.docs;
                     }else{
                         console.log(response.message)
                     }
@@ -233,7 +193,7 @@ export default {
 }
 
 .title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bolder;
     padding: 0.3rem;
     width: 100%;

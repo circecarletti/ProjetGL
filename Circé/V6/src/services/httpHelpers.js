@@ -43,7 +43,7 @@ const sendGet = (url, paramsArray) => {
     if (Array.isArray(paramsArray) && paramsArray.length > 0) {
         let paramsString = '?';
         paramsArray.forEach( param => {
-            paramsString =+ `${param.name}=${param.value}&`
+            paramsString = paramsString + `${param.name}=${param.value}&`;
         });
         fullUrl = url + paramsString.substr(0, paramsString.length - 1);
     } else {
@@ -57,16 +57,19 @@ const sendGet = (url, paramsArray) => {
         method: 'GET'
     };
 
+    console.log(payload);
+
     return fetch(fullUrl, payload).
         then( response => {
+            console.log("dans le get : ", response);
             if (response.ok) {
                 return response.json();
             } else {
-                Promise.reject( { code: response.status, message: response.statusText } );
+                return Promise.reject( { code: response.status, message: response.statusText } );
             }
         });
 
-};
+}; 
 
 /**
  * Envoie une requête Http de type PUT pour uploader un fichier vers le serveur

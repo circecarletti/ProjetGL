@@ -24,6 +24,17 @@
         </div>
         <div class="line">
             <div class="label-cell">
+                <span>Email :</span>
+            </div>
+            <div class="input-cell">
+                <input type="text"
+                    ref="add-customer-email"
+                    v-model="email"
+                    required :pattern="emailRegEx">
+            </div>
+        </div>
+        <div class="line">
+            <div class="label-cell">
                 <span>Age :</span>
             </div>
             <div class="input-cell">
@@ -92,6 +103,7 @@ export default {
         return {
             lastName: '',
             firstName: '',
+            email: '',
             age: '',
             password: '',
             balance: '',
@@ -100,6 +112,7 @@ export default {
             ageRegEx: regexStringFormulaForAge,
         }
     },
+
     watch: {
         firstName() {
             manageValidityMessage(
@@ -110,6 +123,11 @@ export default {
             manageValidityMessage(
                 this.$refs['add-customer-last-name'],
                 `Le nom est obligatoire et doit être au bon format.`);
+        },
+        email() {
+            manageValidityMessage(
+                this.$refs['add-customer-email'],
+                `L'email' est obligatoire et doit être au bon format.`);
         },
         age() {
             manageValidityMessage(
@@ -122,6 +140,7 @@ export default {
                 `Le montant doit être un nombre strictement positif, avec un maximum de deux décimales.`);
         },
     },
+
     computed: {
         balanceNotValid() {
             return !positiveNumberDecimalCheck(Number(this.balance), 2);
@@ -143,6 +162,7 @@ export default {
                     this.lastNameNotValid || this.firstNameNotValid;
         }
     },
+
     methods: {
         onCreate() {
 
@@ -150,17 +170,26 @@ export default {
                 const newCustomer = {
                     firstName: this.firstName,
                     lastName: this.lastName,
-                    age: this.age,
                     email: this.email,
+                    age: this.age,
                     password: this.password,
-                    passwordConfirm: this.password
+                    passwordConfirm: this.password,
+                    balance : this.balance
                 };
 
-                sendPost('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/customers.json', newCustomer).
+                sendPost('https://orsaymediatheque.herokuapp.com/api/users/register', {
+                                                                        id : newCustomer.email,
+                                                                        password : newCustomer.password,
+                                                                        name : newCustomer.lastName,
+                                                                        firstName : newCustomer.firstName,
+                                                                        age : newCustomer.age,
+                                                                        balance : 0
+                                                                    }).
                     then( response => {
                         console.log(response);
                         this.lastName = '';
                         this.firstName = '';
+                        this.email = '';
                         this.age = '';
                         this.password = '';
                         this.balance = '';
