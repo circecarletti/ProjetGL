@@ -10,7 +10,7 @@ const loanSchema = new mongoose.Schema(
             unique: true,
             required: true
         },
-        idResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'resource', default: null}]
+        idResources: [{ type: mongoose.Schema.Types.ObjectId, ref: 'resource'}]
     }
 );
 
