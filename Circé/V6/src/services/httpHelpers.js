@@ -38,12 +38,14 @@ const sendPost = (url, body) => {
  * @returns 
  */
 const sendGet = (url, paramsArray) => {
+    console.log("tableau sendGet (httpHelpers) : ", paramsArray);
 
     let fullUrl = '';
     if (Array.isArray(paramsArray) && paramsArray.length > 0) {
         let paramsString = '?';
         paramsArray.forEach( param => {
             paramsString = paramsString + `${param.name}=${param.value}&`;
+            console.log("param : ", param, "paramsString : ", paramsString)
         });
         fullUrl = url + paramsString.substr(0, paramsString.length - 1);
     } else {
@@ -57,7 +59,7 @@ const sendGet = (url, paramsArray) => {
         method: 'GET'
     };
 
-    console.log(payload);
+    console.log("paylod du senGet (httpHelpers) : ",payload);
 
     return fetch(fullUrl, payload).
         then( response => {

@@ -2,7 +2,7 @@
     <div class="resource-area">
         <div class="picture-area">
             <h3>{{title}}</h3>
-            <img :src="'/' + url" class="image">
+            <!-- <img :src="'/' + url" class="image"> -->
         </div>
         <div class="text-area">
             <h4>INFORMATIONS SUR LA RESSOURCE</h4>
@@ -70,9 +70,10 @@ export default {
             cathegory: ''
         };
     },
+
     computed: {
-        userIsCustomer() {
-            return this.$store.getters['isUserCustomer'];
+        userIsCustomerOrChild() {
+            return this.$store.getters['isUserCustomer'] || this.$$store.getters['isUserChild'];
         },
         userIsManager() {
             return this.$store.getters['isUserManager'];
@@ -111,25 +112,23 @@ export default {
     created() {
         this.id = Number.parseInt(this.$route.params['resourceId']);
         this.waiting = true;
-        sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/stock.json').
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/resource/${this.id}`).
             then( response => {
-                // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                // on récupère la resource dont on a reçu l'identifiant en parametre.
-                // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                // de filtrer les donnnées en fonction de l'appel reçu.
-                const resource = response.find( aResource => aResource.id === this.id);
-                this.dataError = false;
-                this.waiting = false;
+                if(response.success){
+                    const resource = response.docs;
+                    this.dataError = false;
+                    this.waiting = false;
 
-                this.id= resource.id;
-                this.title= resource.titre;
-                this.url= resource.url;
-                this.type= resource.type;
-                this.resume= resource.synopsis;
-                this.author= resource.auteur;
-                this.releaseDate= resource.annee;
-                this.available= resource.disponible;
-                this.cathegory= resource.categorie;
+                    this.id= resource.id;
+                    this.title= resource.titre;
+                    this.url= resource.url;
+                    this.type= resource.type;
+                    this.resume= resource.synopsis;
+                    this.author= resource.auteur;
+                    this.releaseDate= resource.annee;
+                    this.available= resource.disponible;
+                    this.cathegory= resource.categorie;
+                }
             }).
             catch( error => {
                 this.dataError = true;

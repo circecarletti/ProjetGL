@@ -90,20 +90,29 @@ export default {
         onSubmit() {
             this.errorMsg = '';
             const credentials = {
-                identifier: this.email,
+                id: this.email,
                 password: this.password,
             };
 
-            // A FAIRE : appeler le bon service d'authentification
+            // service d'authentification
             sendPost('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/credentials.json', credentials).
                 then( response => {
-                    console.log(response);
-                    // Normalement on reçoit toutes les informations du client dans la réponse et on les sauvegarde dans la store
-                    // Ici, on va mettre des informations "DUMMY"
-                    this.$store.dispatch('setUserId', 101);
-                    this.$store.dispatch('setUserAsManager');
-                    // this.$store.dispatch('setUserId', 102);
-                    // this.$store.dispatch('setUserAsCustomer');
+                    console.log("reponse de connexion : ", response);
+                    if(response.success){
+                        this.$store.dispatch('setUserId', response.docs.id);
+
+                        if(response.docs.status==="manager"){
+                            this.$store.dispatch('setUserAsManager');
+                        }else if(response.docs.status==="adultmember"){
+                            this.$store.dispatch('setUserAsCustomer');
+                        }else if(response.docs.status==="childmember"){
+                            this.$store.dispatch('setUserAsChild');
+                        }
+
+                        this.$store.dispatch('setUserToken', response.docs.token);
+                    }else{
+                        openModal(this, 'theModalLogginFailed', 'La connexion à écchoué, vérifier votre identifiant et mot de passe.')
+                    }
                     this.$router.push('/accueil');
                 }).
                 catch( error => {

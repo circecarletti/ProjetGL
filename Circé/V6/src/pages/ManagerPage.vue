@@ -68,52 +68,41 @@ export default {
     
     methods: {
         onSearchResource(searchCriteria) {
-            const resourceId = Number(searchCriteria.simpleCriteria);
+            // const resourceId = Number(searchCriteria.simpleCriteria);
             const resourceName = searchCriteria.simpleCriteria;
             let criteria = {};
-            if (Number.isInteger(resourceId)) {
-                criteria.id = resourceId;
-            } else if (typeof resourceName === 'string' && resourceName.trim() !== '') {
+            // if (Number.isInteger(resourceId)) {
+            //     criteria.id = resourceId;
+            // } else
+            if (typeof resourceName === 'string' && resourceName.trim() !== '') {
                 criteria.name = resourceName.trim();
-                // regEx just là pour le filtre côté front, n'a plus lieu d'être quand le serveur
-                // fera le filtre
-                criteria.regEx = new RegExp(`^.*${criteria.name}.*$`, 'gi');
             } else {
                 openModal(this, 'manager-error-modal', `Aucun critère de recherche valide pour la ressource.`);
                 return;
             }
             this.searchingResources = true;
 
-            sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/stock.json').
+            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: criteria.toLowerCase()}]).
                 then( response => {
-                    // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                    // on récupère la resource dont on a reçu l'identifiant en parametre.
-                    // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                    // de filtrer les donnnées en fonction de l'appel reçu.
-                    const resources = response.filter( aResource => {
-                        if (typeof criteria.id !== 'undefined') {
-                            // filtre par id
-                            return aResource.id === criteria.id;
-                        } else {
-                            // Filtre par titre/auteur
-                            return aResource.auteur.search(criteria.regEx) !== -1 ||
-                                    aResource.titre.search(criteria.regEx) !== -1;
-                        }
-                    }).map(keptresource => {
-                        return {
-                            title: keptresource.titre,
-                            image: `/${keptresource.url}`,
-                            url: `/resource/${keptresource.id}`,
-                            lines: [ 
-                                `${keptresource.auteur}, ${keptresource.annee}`,
-                                ``,
-                                `${keptresource.type}`,
-                            ]
-                        };
-                    });
-
+                    let result = [];
+                    if(response.succes){
+                        result = response.docs.map(keptresource => {
+                            return {
+                                title: keptresource.title,
+                                image: "",
+                                url: `/resource/${keptresource.id}`,
+                                lines: [ 
+                                    `${keptresource.author}, ${keptresource.releaseDate}`,
+                                    ``,
+                                    `${keptresource.type}`,
+                                ]
+                            };
+                        });
+                    }else{
+                        console.log(response.message);
+                    }
                     this.searchingResources = false;
-                    this.resourceResults = resources;
+                    this.resourceResults = result;
                 }).
                 catch( error => {
                     openModal(this, 'manager-error-modal', `erreur lors de la recherche de la ressource : ${error.message}`);
@@ -125,21 +114,18 @@ export default {
 
 
         onSearchCustomers(searchCriteria) {
-            const customerId = Number(searchCriteria.simpleCriteria);
+            // const customerId = Number(searchCriteria.simpleCriteria);
             const customerName = searchCriteria.simpleCriteria;
             let criteria = {};
-            if (Number.isInteger(customerId)) {
-                criteria.id = customerId;
-            } else if (typeof customerName === 'string' && customerName.trim() !== '') {
+            // if (Number.isInteger(customerId)) {
+            //     criteria.id = customerId;
+            // } else 
+            if (typeof customerName === 'string' && customerName.trim() !== '') {
                 criteria.name = customerName.trim();
-                // regEx just là pour le filtre côté front, n'a plus lieu d'être quand le serveur
-                // fera le filtre
-                criteria.regEx = new RegExp(`^.*${criteria.name}.*$`, 'gi');
             } else {
                 openModal(this, 'manager-error-modal', `Aucun crière de recherche valide pour l'adhérent.`);
                 return;
             }
-
 
             this.searchingCustomers = true;
             // Ici normalement, on appelle le service qui renvoie les données

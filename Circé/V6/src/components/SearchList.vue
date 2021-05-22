@@ -1,8 +1,8 @@
 <template>
     <div class="searchListArea" v-if="!searching">
-        <!-- <div class="empty-result" v-if="noResult">
+        <div class="empty-result" v-if="noResult">
             <label><h3>Aucun resultats</h3></label>
-        </div> -->
+        </div>
         <div class="line" v-for="(anItem, index) in result" :key="anItem" @click="onSelect(index)">
             <div class="image-area">
                 <!-- <img :src="'/' + anItem.url" class="image"> -->
@@ -50,7 +50,7 @@ export default {
 
     computed: {
         noResult(){
-            return this.result===[];
+            return this.result.length===0;
         }
     },
 
@@ -91,13 +91,13 @@ export default {
         },
         
         simpleSearch(titleOrAuthor) {
-            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: titleOrAuthor}]).
+            this.result = [];
+            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: titleOrAuthor.toLowerCase()}]).
                 then( response => {
                     if(response.success){
                         this.result = response.docs;
                     }else{
                         console.log("erreur : ", response.message);
-                        this.result = [];
                     }
                     this.dataError = false;
                     this.searching = false;
@@ -112,20 +112,39 @@ export default {
         },
 
         advancedSearch(criteriaObject) {
-            console.log({
-                            title : criteriaObject.title,
-                            author : criteriaObject.author,
-                            category : criteriaObject.categories[0],
-                            releasedDate : criteriaObject.releaseDate,
-                            type : criteriaObject.types[0]
-                        })
-            sendGet('https://orsaymediatheque.herokuapp.com/api/resource/searchFilter', {
-                                                                                            title : criteriaObject.title,
-                                                                                            author : criteriaObject.author,
-                                                                                            category : criteriaObject.categories,
-                                                                                            releasedDate : criteriaObject.releaseDate,
-                                                                                            type : criteriaObject.types
-                                                                                        }).
+            this.result = [];
+
+            const sendedCriterias = [];
+                
+            if(criteriaObject.title){
+                sendedCriterias.push({name: "title", value: criteriaObject.title.toLowerCase()});
+            }
+
+            if(criteriaObject.author){
+                sendedCriterias.push({name: "author", value: criteriaObject.author.toLowerCase()});
+            }
+
+            if(criteriaObject.releasedDate){
+                sendedCriterias.push({name: "releasedDate", value: criteriaObject.releasedDate});
+            }
+
+            if(criteriaObject.categories.length > 0){
+                sendedCriterias.push({name: "category", value: criteriaObject.categories[0].toLowerCase()});
+            }
+            // if(criteriaObject.categories){
+            //     sendedCriterias.push({name: "category", value: criteriaObject.categories.map(cat => cat.toLowerCase())});
+            // }
+            
+            if(criteriaObject.types.length > 0){
+                sendedCriterias.push({name: "type", value: criteriaObject.types[0].toLowerCase()});
+            }
+            // if(criteriaObject.types){
+            //     sendedCriterias.push({name: "type", value: criteriaObject.types.map(cat => cat.toLowerCase())});
+            // }
+
+            console.log("Critères ressources recherchées en advanced research : ", sendedCriterias);
+
+            sendGet('https://orsaymediatheque.herokuapp.com/api/resource/searchFilter',sendedCriterias).
                 then( response => {
                     if(response.success){
                         this.result = response.docs;
@@ -219,5 +238,9 @@ export default {
     position: absolute;
     bottom: 0;
     right: 0;
+}
+
+.empty-result {
+    padding-left: 0.3rem;
 }
 </style>

@@ -65,7 +65,7 @@ export default {
                 if (this.isCustomer) {
                     const currentFunctionLists = [];
                     currentFunctionLists.push({ title: `Liste d'emprunt`, routePath: `/customer/${custId}/borrowed`});
-                    if (userRequested.age >= 18) {
+                    if (this.$store.getters['isUserChild']) {
                         currentFunctionLists.push({ title: `Réapprovisioner solde`, routePath: `/customer/${custId}/balance-feed`});
                         currentFunctionLists.push({ title: `Compte(s) mineur(s)`, routePath: `/customer/${custId}/children-accounts-list`});
                     }

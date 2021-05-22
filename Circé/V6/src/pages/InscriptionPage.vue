@@ -127,36 +127,33 @@ export default {
             errorMsg: ''
         }
     },
+
     computed: {
     },
+
     methods: {
+
         endSubscription() {
             this.$router.push('/accueil');
         },
+
         subscribe() {
             this.errorMsg = '';
             const newCustomer = {
                 firstName: this.firstName,
-                lastName: this.lastName,
+                name: this.lastName,
                 age: this.age,
-                email: this.email,
+                id: this.email,
                 password: this.password,
-                passwordConfirm: this.passwordConfirm
+                passwordConfirm: this.passwordConfirm,
+                balance : 0
             };
 
-            sendPost('https://orsaymediatheque.herokuapp.com/api/users/register', {
-                                                                                        id : newCustomer.email,
-                                                                                        password : newCustomer.password,
-                                                                                        name : newCustomer.lastName,
-                                                                                        firstName : newCustomer.firstName,
-                                                                                        age : newCustomer.age,
-                                                                                        balance : 0
-                                                                                    }).
-                then( response => {
+            sendPost('https://orsaymediatheque.herokuapp.com/api/users/register', newCustomer)
+                .then( response => {
                     console.log(response);
                     openModal(this, 'theModalSuccess', `Votre inscription s'est correctement déroulée.`)
-                }).
-                catch( error => {
+                }).catch( error => {
                     console.error(error);
                     this.errorMsg = error.message;
                     openModal(this, 'theModalFail');
@@ -191,8 +188,11 @@ export default {
         },
 
         password(newValue) {
+            console.log('le mdp saisi : ', newValue);
             if (newValue === '' || newValue !== this.passwordConfirm) {
                 this.passportElement.setCustomValidity(`Le mot de passe est obligatoire et doit être égal à sa confirmation.`);
+            } else if (newValue.length < 8) {
+                this.passportElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
             } else {
                 this.passportElement.setCustomValidity(``);
                 this.passwordConfirmElement.setCustomValidity(``);
@@ -201,8 +201,9 @@ export default {
 
         passwordConfirm(newValue) {
             if (newValue === '' || newValue !== this.password) {
-                this.passwordConfirmElement.
-                    setCustomValidity(`La confirmation du mot de passe est obligatoire et doit être égale à l'originel.`);
+                this.passwordConfirmElement.setCustomValidity(`La confirmation du mot de passe est obligatoire et doit être égale à l'originel.`);
+            }else if (newValue.length < 8) {
+                this.passportElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
             } else {
                 this.passportElement.setCustomValidity(``);
                 this.passwordConfirmElement.setCustomValidity(``);

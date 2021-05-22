@@ -10,8 +10,9 @@ const store = createStore({
   // à jour les états
   state() {
     return {
-      userType: 'unauthenticated', // Un parmis : 'unAuthenticated', 'customer', 'manager'
+      userType: 'unauthenticated', // Un parmis : 'unAuthenticated', 'customer', 'manager', 'child'
       userId: -1,
+      token:''
     };
   },
 
@@ -31,6 +32,10 @@ const store = createStore({
       state.userType = 'manager';
     },
 
+    setUserAsChild(state) {
+      state.userType = 'child';
+    },
+
     setUserAsUnAuthenticated(state) {
       state.userType = 'unauthenticated';
     },
@@ -38,6 +43,10 @@ const store = createStore({
     setUserId(state, id) {
       state.userId = id;
     },
+
+    setToken(state, token){
+      state.token = token;
+    }
   },
 
 
@@ -53,11 +62,19 @@ const store = createStore({
       return state.userType === 'customer';
     },
 
+    isUserChild(state) {
+      return state.userType === 'child';
+    },
+
     isUserManager(state) {
       return state.userType === 'manager';
     },
 
     userId(state) {
+      return state.userId;
+    },
+
+    userToken(state) {
       return state.userId;
     },
   },
@@ -68,8 +85,13 @@ const store = createStore({
   // de l'extérieur avec this.$store.dispatch('nom action', {objet payload facultatif })
   // équivaut à des setter public
   actions: {
+
     setUserAsCustomer(context) {
       context.commit('setUserAsCustomer');
+    },
+
+    setUserAsChild(context) {
+      context.commit('setUserAsChild');
     },
 
     setUserAsManager(context) {
@@ -83,6 +105,10 @@ const store = createStore({
     setUserId(context, id) {
       context.commit('setUserId', id);
     },
+
+    setToken(context, token){
+      context.commit('setUserId', token);
+    }
   },
 
 });
