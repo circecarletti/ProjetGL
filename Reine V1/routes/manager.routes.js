@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const managerController = require('../controllers/manager.controller');
 
+//routes for manager is https://orsaymediatheque.herokuapp.com/api/user/manager
+
 //get user info 
 router.get('/:id', managerController.userInfo);
 

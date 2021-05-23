@@ -69,10 +69,18 @@ module.exports.SearchByFilter = async (req, res) => {
         return res.json({success: false, message : 'error params'});
     }
 
-    const { title, author, category, releaseDate, type } = req.query
+    const { title, author, releaseDate } = req.query 
     console.log(req.query)
 
     var query = {};
+    var queryCategory = { $or: [] } ;
+    var queryType = { $or: [] } ; 
+    /* const query = {
+        $or: [ 
+            { "title" : { $regex: '.*' + name + '.*' }}, 
+            { "author" : { $regex: '.*' + name + '.*' }}
+        ]
+    }; */
     console.log(query)
 
     if(title) {
@@ -85,9 +93,19 @@ module.exports.SearchByFilter = async (req, res) => {
             query.author = { $regex: '.*' + author + '.*' };
         }
     }
-    if(category) {
-        if (!(category === "")) {
-            query.category = category;
+    if(req.query.category_child) {
+        if (!(req.query.category_child === "")) {
+            queryCategory["$or"].push( { "category" : req.query.category_child} );
+        }
+    }
+    if(req.query.category_adult) {
+        if (!(req.query.category_adult === "")) {
+            queryCategory["$or"].push( { "category" : req.query.category_adult} );
+        }
+    }
+    if(req.query.category_allpublic) {
+        if (!(req.query.category_allpublic === "")) {
+            queryCategory["$or"].push( { "category" : req.query.category_allpublic} );
         }
     }
     if(releaseDate) {
@@ -95,11 +113,35 @@ module.exports.SearchByFilter = async (req, res) => {
             query.releaseDate = releaseDate;
         }
     }
-    if(type) {
-        if (!(type === "")) {
-            query.type = type;
+    if(req.query.type_livre) {
+        if (!(req.query.type_livre === "")) {
+            queryType["$or"].push ( { "type" : req.query.type_livre});
         }
     }
+    if(req.query.type_cd) {
+        if (!(req.query.type_cd === "")) {
+            queryType["$or"].push ( { "type" : req.query.type_cd});
+        }
+    }
+    if(req.query.type_dvd) {
+        if (!(req.query.type_dvd === "")) {
+            queryType["$or"].push ( { "type" : req.query.type_dvd});
+        }
+    }
+    if(req.query.type_videogames) {
+        if (!(req.query.type_videogames === "")) {
+            queryType["$or"].push ( { "type" : req.query.type_videogames});
+        }
+    }
+
+    if(queryCategory["$or"].length>0){
+        query.category = queryCategory;
+    }
+
+    if(queryType["$or"].length>0){
+        query.type = queryType;
+    }
+
     console.log(query)
     try {
         await ResourceModel.find(query,'-_id -__v',function(err, docs){
