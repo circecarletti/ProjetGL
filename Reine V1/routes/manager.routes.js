@@ -28,10 +28,12 @@ router.put('/unlockMember', managerController.unlockMember);
 router.put('/rentResource', managerController.rentResource);
 
 //createRessource
-//router.post('/createResource', managerController.createResource);
+router.post('/createResource', managerController.createResource);
+
+//return a resource 
+router.put('/returnResource', managerController.returnResource);
 
 //route update password
 //router.put('/updatePassword', userController.updatePassword);
-
 
 module.exports = router;

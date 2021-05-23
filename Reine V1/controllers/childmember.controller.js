@@ -186,14 +186,14 @@ module.exports.rentResource = async (req, res) => {
                 LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id } }, {new: true, upsert: true},
                     function (error, success) {
                           if (error) {
-                              console.log(error);
+                            return res.json({success: false, message: "error add resource to loan list", err});
                           } else {
                               console.log(success);
                           }});
                 ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: true, idmember:docs._id } } ,
                     function (error, success) {
                         if (error) {
-                            console.log(error);
+                            return res.json({success: false, message: "error add information to resource ", err});
                         } else {
                             console.log(success);
                         }
@@ -206,3 +206,52 @@ module.exports.rentResource = async (req, res) => {
         return res.json({success: false, message: "error resource not borrowed", err});
    }
 };
+
+//return a resource //retourner  une resource
+module.exports.returnResource = async (req, res) => {
+    const email = req.body.id;
+    const idResource = req.body.idresource;
+
+    //check if email is in the database
+    if(!(await ChildMemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+
+    if(!(await ResourceModel.exists({ id: idResource})))
+        return res.json({success:false, message:'resource does not exist'});
+    
+    try {
+
+        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember:'' }} ,
+            function (error, success) {
+                if (error) {
+                    return res.json({success: false, message: "error modify resource", err});
+                } else {
+                    console.log(success);
+                }
+            }
+        );
+        await LoanModel.findOneAndUpdate({id: docs.loan},{ $pull: { idresources: idResource }}, {safe: true, upsert: true},
+            function (error, success) {
+                  if (error) {
+                    return res.json({success: false, message: "error pull resource from loan", err});
+                } else {
+                      console.log(success);
+                  }
+            }
+        );
+
+        await MemberModel.findOneAndUpdate({id: docs.loan}, {$inc: {nbresource: -1 }} ,
+            function (error, success) {
+                if (error) {
+                    return res.json({success: false, message: "error modify resource", err});
+                } else {
+                    console.log(success);
+                }
+            }
+        );
+        return res.json({success: true, message: 'success returning the resource'});    
+    } catch (err) {
+        return res.json({success: false, message: "error returning the resource", err});
+   }
+};
+

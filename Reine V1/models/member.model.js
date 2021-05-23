@@ -63,7 +63,7 @@ const memberSchema = new mongoose.Schema(
             max: 10,
             default:0
         }, 
-        subscribe: {
+        subscribe: { 
             type: Boolean, 
             default: false
         },

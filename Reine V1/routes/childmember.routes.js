@@ -23,6 +23,9 @@ router.put('/updateAge', childMemberController.updateAge);
 //rent a resource
 router.put('/rentResource', childMemberController.rentResource);
 
+//return a resource 
+router.put('/returnResource', childMemberController.returnResource);
+
 //rent a resource
 //router.put('/rentResource', childMemberController.rentResource);
 

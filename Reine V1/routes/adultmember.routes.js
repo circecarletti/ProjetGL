@@ -41,6 +41,9 @@ router.put('/buyMembership', adultMemberController.buyMembership);
 //rent a resource
 router.put('/rentResource', adultMemberController.rentResource);
 
+//return a resource 
+router.put('/returnResource', adultMemberController.returnResource);
+
 //route update password
 //router.put('/updatePassword', userController.updatePassword);
 

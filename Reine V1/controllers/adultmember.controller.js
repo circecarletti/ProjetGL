@@ -400,14 +400,14 @@ module.exports.rentResource = async (req, res) => {
                 LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id }}, {new: true, upsert: true},
                     function (error, success) {
                           if (error) {
-                              console.log(error);
-                          } else {
+                            return res.json({success: false, message: "error add resource to loan list", err});
+                        } else {
                               console.log(success);
                           }});
                 ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: true, idmember:docs._id } } ,
                     function (error, success) {
                         if (error) {
-                            console.log(error);
+                            return res.json({success: false, message: "error add information to resource ", err});
                         } else {
                             console.log(success);
                         }
@@ -421,7 +421,7 @@ module.exports.rentResource = async (req, res) => {
    }
 };
 
-//rent a resource //louer une resource
+//return a resource //retourner  une resource
 module.exports.returnResource = async (req, res) => {
     const email = req.body.id;
     const idResource = req.body.idresource;
@@ -435,81 +435,37 @@ module.exports.returnResource = async (req, res) => {
     
     try {
 
-        await ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: false, idmember:'' }} ,
+        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember:'' }} ,
             function (error, success) {
                 if (error) {
-                    console.log(error);
+                    return res.json({success: false, message: "error modify resource", err});
                 } else {
                     console.log(success);
                 }
             }
         );
-
-        LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id }}, {new: true, upsert: true},
+        await LoanModel.findOneAndUpdate({id: docs.loan},{ $pull: { idresources: idResource }}, {safe: true, upsert: true},
             function (error, success) {
                   if (error) {
-                      console.log(error);
-                  } else {
+                    return res.json({success: false, message: "error pull resource from loan", err});
+                } else {
                       console.log(success);
                   }
             }
         );
 
-        for( var i = 0; i < arr.length; i++){ 
-    
-            if ( arr[i] === 5) { 
-        
-                arr.splice(i, 1); 
-            }
-        
-        }
-
-        await MemberModel.findOneAndUpdate({ id : email})
-        .exec(function(err, docs) {
-            if(err){
-                console.log(err);
-                return res.json({success:false, message:'error get infos user'});
-            }
-            console.log('ok' + docs)
-
-            if(docs.balance < resource.price ) {
-                return res.json({success:false, message:'insufficient balance'});
-            }else if(docs.nbresource == 10) {
-                return res.json({success:false, message:'number of resources equal to 10'});
-            }else if(docs.block) {
-                return res.json({success:false, message:'member is blocked and cannot borrow resources'});
-            }
-            else {
-                if (docs.subscribe) {//if subscribe 30% reductions 
-                    var price = Math.floor(resource.price * ( 1 - (30/100)));
-                    console.log(price);
-                } else{
-                    var price = resource.price;
+        await MemberModel.findOneAndUpdate({id: docs.loan}, {$inc: {nbresource: -1 }} ,
+            function (error, success) {
+                if (error) {
+                    return res.json({success: false, message: "error modify resource", err});
+                } else {
+                    console.log(success);
                 }
-                docs.balance = docs.balance - price;
-                docs.nbresource = docs.nbresource + 1;
-                docs.save();
-                LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id }}, {new: true, upsert: true},
-                    function (error, success) {
-                          if (error) {
-                              console.log(error);
-                          } else {
-                              console.log(success);
-                          }});
-                ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: true, idmember:docs._id } } ,
-                    function (error, success) {
-                        if (error) {
-                            console.log(error);
-                        } else {
-                            console.log(success);
-                        }
-                    }
-                );
-            return res.json({success: true, message: 'the resource was borrowed at a cost of '+ price});    
             }
-        });
+        );
+        return res.json({success: true, message: 'success returning the resource'});    
     } catch (err) {
-        return res.json({success: false, message: "error resource not borrowed", err});
+        return res.json({success: false, message: "error returning the resource", err});
    }
 };
 
