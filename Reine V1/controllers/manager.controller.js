@@ -224,7 +224,9 @@ module.exports.createResource = async (req, res) => {
         category: req.body.category,
         author: req.body.author, 
         releaseDate: req.body.releaseDate,
-        type: req.body.type
+        type: req.body.type,
+        resume: (req.body.resume) ? req.body.resume : '',
+        synopsis: (req.body.synopsis) ? req.body.synopsis : ''
     });
 
     try {

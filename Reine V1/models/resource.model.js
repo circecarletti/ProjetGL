@@ -54,6 +54,18 @@ const resourceSchema = new mongoose.Schema(
         picture: {
             type: String,
             default: "./upoads/profil/random-user.png"
+        },
+        resume: {
+            type: String,
+            maxlength: 1000, 
+            minlength:0,
+            trim: true
+        },
+        synopsis: {
+            type: String,
+            maxlength: 1000, 
+            minlength:0,
+            trim: true
         }
     }
 )
