@@ -35,25 +35,20 @@ module.exports.getChildInfo = async (req, res) => {
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
-    console.log('ok 1')
+
     try {
         //adult  
-        console.log('ok 2')
-        await AdultMemberModel.findOne({ id : email}, '-_id -__v')
-        .populate({path:'childlist', model:'childmember', select: 'id age -_id -__v',  populate:[{path:'member', model:'member', select: 'balance -_id -__v'}]})
+        await AdultMemberModel.findOne({ id : email}, '-member -_id -id -age -__v')
+        .populate({path:'childlist', select:'id age', populate:[{path:'member', select:'balance name firstname '}]})
         .exec(function(err, docs){
             if(err){
-                console.log('ok 3')
-
-                return res.json({success: false, message : ' error get info childinfo', err});
+                return res.json({success: false, message : ' error get childinfo', err});
             }
-            console.log('ok 4')
-
-            return res.json({success: true, message:'success get info childinfo', docs});
+            return res.json({success: true, message:'success get childinfo', docs});
         });
-    }catch(err){
+    } catch(err){
         console.log(err);
-        return res.json({success: false, message : 'error get info childinfo', err});
+        return res.json({success: false, message : 'error childinfo get', err});
     }
 };
 
@@ -66,17 +61,17 @@ module.exports.getLoanInfo = async (req, res) => {
         return res.json({success:false, message:'email not in database'});
     try {
         //adult  
-        await AdultMemberModel.findOne({ id : email}, ' ')
-        .populate({path:'childlist', model: childmember, populate:[{path:'member', model:member}]})
+        await AdultMemberModel.findOne({ id : email}, '-_id -id -age -childlist -__v')
+        .populate({path:'member', select: 'member.loan -_id', populate:[{ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]}]})
         .exec(function(err, docs){
                 if(err){
-                    return res.json({success: false, message : ' error get info childinfo', err});
+                    return res.json({success: false, message : ' error get loan info', err});
                 }
-                res.json({success: true, message:'success get info childinfo', docs});
+                res.json({success: true, message:'success get loan info', docs});
             });
     }catch(err){
         console.log(err);
-        return res.json({success: false, message : 'error get info childinfo', err});
+        return res.json({success: false, message : 'error get loan info', err});
     }
 };
 

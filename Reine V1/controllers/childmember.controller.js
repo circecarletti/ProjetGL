@@ -25,6 +25,28 @@ module.exports.userInfo = async (req, res) => {
     }
 };
 
+//informations user 
+module.exports.getLoanInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await ChildMemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+    try {
+        //adult  
+        await ChildMemberModel.findOne({ id : email}, ' -_id -id -age -__v -adultmember')
+        .populate({path:'member', select: 'member.loan -_id', populate:[{ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]}]})
+        .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get info childinfo', err});
+                }
+                res.json({success: true, message:'success get info childinfo', docs});
+            });
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, message : 'error get info childinfo', err});
+    }
+};
 
 //update name
 module.exports.updateName = async (req, res) => {

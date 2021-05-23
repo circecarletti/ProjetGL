@@ -8,6 +8,9 @@ const childMemberController = require('../controllers/childmember.controller');
 //get user info 
 router.get('/:id', childMemberController.userInfo);
 
+//get loan info 
+router.get('/loanInfo/:id', childMemberController.getLoanInfo);
+
 //route update name
 router.put('/updateName', childMemberController.updateName);
 
