@@ -39,7 +39,8 @@
     <the-modal ref="theModalLogginFailed" 
         title="Echec de la connexion" 
         type="error"
-        okButtonLabel="OK">
+        okButtonLabel="OK"
+        @ok-close="goToConnexion">
     </the-modal>
 </template>
 
@@ -97,7 +98,6 @@ export default {
             // service d'authentification
             sendPost('https://orsaymediatheque.herokuapp.com/api/users/login', credentials).
                 then( response => {
-                    console.log("reponse de connexion : ", response);
                     if(response.success){
                         this.$store.dispatch('setUserId', this.email);
 
@@ -110,16 +110,26 @@ export default {
                         }
 
                         this.$store.dispatch('setUserToken', response.token);
+                        
+                        this.$router.push('/accueil');
                     }else{
-                        openModal(this, 'theModalLogginFailed', 'La connexion à écchoué, vérifier votre identifiant et mot de passe.')
+                        console.log("error in loging in : ", response.message);
+                        if(response.message === 'user is block please contact manager'){
+                            openModal(this, 'theModalLogginFailed', 'Votre compte est bloqué, veuillez contacter un manager pour vous débloquer.');
+                        }else{
+                            openModal(this, 'theModalLogginFailed', 'La connexion à échouée, vérifier votre identifiant et mot de passe.');
+                        }
                     }
-                    this.$router.push('/accueil');
                 }).
                 catch( error => {
                     console.error(error);
                     openModal(this, 'theModalLogginFailed', `La connexion n'a put être effectuée.`);
                 });
 
+        },
+
+        goToConnexion(){
+            this.$router.push('/connexion');
         }
     },
 

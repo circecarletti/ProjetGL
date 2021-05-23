@@ -38,7 +38,7 @@
                         name="age" 
                         ref="age" 
                         required 
-                        :pattern="ageAvlidationRegExFormula"
+                        :pattern="ageValidationRegExFormula"
                         v-model="age">
                     <span></span>
                 </div>
@@ -119,11 +119,11 @@ export default {
             email: '',
             emailElement: undefined,
             password: '',
-            passportElement: undefined,
+            passwordElement: undefined,
             passwordConfirm: '',
             passwordConfirmElement: undefined,
             nameValidationRegExFormula: regexStringFormulaForName,
-            ageAvlidationRegExFormula: regexStringFormulaForAge,
+            ageValidationRegExFormula: regexStringFormulaForAge,
             errorMsg: ''
         }
     },
@@ -175,10 +175,13 @@ export default {
                 `Le prénom est obligatoire et ne doit pas comporter d'espace avant ou après.`);
         },
 
-        age() {
+        age(newValue) {
             manageValidityMessage(
                 this.ageElement,
-                `L'age est obligatoire et doit être un entier positif.`);
+                `L'age est obligatoire et doit être positif.`);
+            if (Number(newValue) < 18) {
+                this.ageElement.setCustomValidity(`Vous devez être majeur pour vous inscrire depuis cette page. Si vous êtes mineur, votre responsable légal doit vous inscrire depuis la page de son compte.`);
+            }
         },
 
         email() {
@@ -188,13 +191,12 @@ export default {
         },
 
         password(newValue) {
-            console.log('le mdp saisi : ', newValue);
             if (newValue === '' || newValue !== this.passwordConfirm) {
-                this.passportElement.setCustomValidity(`Le mot de passe est obligatoire et doit être égal à sa confirmation.`);
+                this.passwordElement.setCustomValidity(`Le mot de passe est obligatoire et doit être égal à sa confirmation.`);
             } else if (newValue.length < 8) {
-                this.passportElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
+                this.passwordElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
             } else {
-                this.passportElement.setCustomValidity(``);
+                this.passwordElement.setCustomValidity(``);
                 this.passwordConfirmElement.setCustomValidity(``);
             }
         },
@@ -203,9 +205,9 @@ export default {
             if (newValue === '' || newValue !== this.password) {
                 this.passwordConfirmElement.setCustomValidity(`La confirmation du mot de passe est obligatoire et doit être égale à l'originel.`);
             }else if (newValue.length < 8) {
-                this.passportElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
+                this.passwordElement.setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
             } else {
-                this.passportElement.setCustomValidity(``);
+                this.passwordElement.setCustomValidity(``);
                 this.passwordConfirmElement.setCustomValidity(``);
             }
         },
@@ -217,7 +219,7 @@ export default {
         this.firstNameElement = this.$refs['firstName'];
         this.ageElement = this.$refs['age'];
         this.emailElement = this.$refs['email'];
-        this.passportElement = this.$refs['password'];
+        this.passwordElement = this.$refs['password'];
         this.passwordConfirmElement = this.$refs['passwordConfirm'];
     }
 }

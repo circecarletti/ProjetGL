@@ -106,7 +106,7 @@ const store = createStore({
       context.commit('setUserId', id);
     },
 
-    setToken(context, token){
+    setUserToken(context, token){
       context.commit('setUserId', token);
     }
   },
