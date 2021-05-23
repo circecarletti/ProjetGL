@@ -16,16 +16,62 @@ module.exports.userInfo = async (req, res) => {
         //adult  
         await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
             .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")
-            .populate('childList')
             .exec(function(err, docs){
                 if(err){
                     return res.json({success: false, message : ' error get info adultmember', err});
                 }
-                res.json({success: true, message:'success get user info', docs});
+                res.json({success: true, message:'success get adultmember info', docs});
             });
     }catch(err){
         console.log(err);
         return res.json({success: false, message : ' error get info adultmember', err});
+    }
+};
+
+//informations user 
+module.exports.getChildInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await AdultMemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+    try {
+        //adult  
+        console.log('ok')
+        await AdultMemberModel.findOne({ id : email})
+        .populate({path:'childList', populate:[{path:'member'}]})
+        .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get info childinfo', err});
+                }
+                return res.json({success: true, message:'success  get info childinfo', docs});
+            });
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, message : ' error  get info childinfo', err});
+    }
+};
+
+//informations user 
+module.exports.getLoanInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await AdultMemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+    try {
+        //adult  
+        await AdultMemberModel.findOne({ id : email}, ' ')
+        .populate({path:'childList', model: childmember, populate:[{path:'member', model:member}]})
+        .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get info childinfo', err});
+                }
+                res.json({success: true, message:'success  get info childinfo', docs});
+            });
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, message : ' error  get info childinfo', err});
     }
 };
 

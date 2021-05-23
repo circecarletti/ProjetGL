@@ -136,6 +136,11 @@ module.exports.signIn = async (req, res) => {
 
 //logout user
 module.exports.logout = async (req, res) => {
-    res.cookie('jwt', '', { maxAge: 1}); // cookie set time to 1milisseconds not valid anymore logout member
-    res.redirect('/');
+    try {
+        res.cookie('jwt', '', { maxAge: 1}); // cookie set time to 1milisseconds not valid anymore logout member
+        res.redirect('/');
+        res.json({ success: true, message: 'success logout', err});
+    }catch(err){
+        res.json({ success: false, message: 'error logout', err});
+    }
 }

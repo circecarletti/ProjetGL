@@ -9,6 +9,27 @@ module.exports.userInfo = async (req, res) => {
     const email = req.params.id;
 
     //check if email is in the database
+    if(!(await ManagerModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+    try{
+    // manager
+        await ManagerModel.findOne({id : email }, '-password -__v -_id')
+            .then(function(docs){
+                return res.json({success:true, message: 'success get info', docs});
+            })
+            .catch(function(err) {
+                return res.json({success : false, message : 'get error get manager info', err});
+            });
+    }catch(err){
+        return res.json({success: false, message : 'error manager info', err});
+    }
+};
+
+//informations user 
+module.exports.getUsersInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
     if(!(await MemberModel.exists({ id: email}) || await ManagerModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
     

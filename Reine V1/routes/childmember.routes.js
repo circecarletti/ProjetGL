@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const childMemberController = require('../controllers/childmember.controller');
 
-//routes for adultmember is https://orsaymediatheque.herokuapp.com/api/user/adultmember
+//routes for childmember is https://orsaymediatheque.herokuapp.com/api/user/childmember
 
 //child update ses infos ??
 
@@ -20,6 +20,5 @@ router.put('/updateAge', childMemberController.updateAge);
 
 //rent a resource
 //router.put('/rentResource', childMemberController.rentResource);
-
 
 module.exports = router;

@@ -57,13 +57,13 @@ app.get('/jwtidManager', requireAuthManager, (req, res) => {
 
 
 //middleware jwt to verify auth user 
-//launch middleware auth adult if route is 
+//launch middleware auth adult for all routes of adult member
 app.get('/api/user/adultmember', checkAdultMember);
 
-//launch middleware auth child if route is 
+//launch middleware auth child for all routes of child member
 app.get('/api/user/childmember', checkChildMember);
 
-//launch middleware auth child if route is 
+//launch middleware auth child for all routes of manager
 app.get('/api/user/manager', checkManager);
 
 

@@ -8,6 +8,12 @@ const adultMemberController = require('../controllers/adultmember.controller');
 //get user info 
 router.get('/:id', adultMemberController.userInfo);
 
+//get child info 
+router.get('/childInfo/:id', adultMemberController.getChildInfo);
+
+//get loan info 
+router.get('/loanInfo/:id', adultMemberController.getLoanInfo);
+
 //route signup childmember
 router.post('/registerChild', adultMemberController.signUpChild);
 

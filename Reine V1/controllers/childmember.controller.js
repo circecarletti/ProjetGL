@@ -9,16 +9,15 @@ module.exports.userInfo = async (req, res) => {
         //check if email is in the database
         if(!(await ChildMemberModel.exists({ id: email})))
             return res.json({success:false, message:'email not in database'});
-        
+
         //child
         await ChildMemberModel.findOne({ id : email}, '-__v -_id')
-            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")   
-            .then(function(docs){
-                return res.json({success: true, message: 'get child info ok ',docs});
-            })
-            .catch(function(err) {
-                res.json({success: false, message : 'error email', err});
-                return;
+        .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")
+        .exec(function(err, docs){
+            if(err){
+                return res.json({success: false, message : 'get child info ok', err});
+            }
+                return res.json({success: true, message:'error get child info', docs});
         });
     }catch(err){
         console.log(err);
