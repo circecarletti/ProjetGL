@@ -21,7 +21,7 @@ const resourceSchema = new mongoose.Schema(
         },
         category: { 
             type: String, 
-            enum: ['enfant', 'adulte', 'touspublic'],
+            enum: ['child', 'adult', 'allpublic'],
             required: true
         },
         author: {
@@ -37,7 +37,7 @@ const resourceSchema = new mongoose.Schema(
         },
         type: { 
             type: String, 
-            enum: ['livre', 'cd', 'dvd', 'jeuxvideo'],
+            enum: ['book', 'cd', 'dvd', 'videogames'],
         },
         loanday: { //jourDEmpruntRestant
             type: Number, 
