@@ -20,6 +20,8 @@ router.put('/updateFirstName', childMemberController.updateFirstName);
 //route update age
 router.put('/updateAge', childMemberController.updateAge);
 
+//rent a resource
+router.put('/rentResource', childMemberController.rentResource);
 
 //rent a resource
 //router.put('/rentResource', childMemberController.rentResource);

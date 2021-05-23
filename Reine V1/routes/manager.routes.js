@@ -25,10 +25,10 @@ router.put('/updateAge', managerController.updateAge);
 router.put('/unlockMember', managerController.unlockMember);
 
 //rent a resource
-//router.put('/rentResource', managerController.rentResource);
+router.put('/rentResource', managerController.rentResource);
 
 //createRessource
-router.post('/createResource', managerController.createResource);
+//router.post('/createResource', managerController.createResource);
 
 //route update password
 //router.put('/updatePassword', userController.updatePassword);

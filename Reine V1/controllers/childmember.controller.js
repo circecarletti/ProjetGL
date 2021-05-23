@@ -138,40 +138,71 @@ module.exports.updateAge = async (req, res) => {
 //rent a resource //louer une resource
 module.exports.rentResource = async (req, res) => {
     const email = req.body.id;
-    const idResource = req.body.idResource;
+    const idResource = req.body.idresource;
 
     //check if email is in the database
-    if(!(await MemberModel.exists({ id: email})))
+    if(!(await ChildMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
+
+    if(!(await ResourceModel.exists({ id: idResource})))
+        return res.json({success:false, message:'resource does not exist'});
     
     try {
-        Order.findOne({'_id' : id})
-        .select('client.phone client.email orderdetails.status reference')
-        .exec(function(err, order) {
-          //
-        });
-    
-        
-        if(MemberModel)
+        const resource = await ResourceModel.findOne({ id : idResource});
 
-        await MemberModel.findOneAndUpdate(
-                {id: email}, 
-                {
-                    $set: {
-                        password: password
-                    }
-                },
-                { new: true, upsert: true, setDefaultsOnInsert: true},
-                (err,docs) => {
-                    if(err) {
-                        console.log(err);
-                        res.json({success: false, message: "password not modified",  err});
-                        return;
-                    }
+        console.log('ok' + resource)
+
+        if (resource.loan)
+            return res.json({success:false, message:'resource is already borrowed'});
+        
+        if (resource.category === 'adult')
+            return res.json({success:false, message:'resource for adult cannot be borrowed by a child'});    
+
+        await MemberModel.findOne({ id : email})
+        .exec(function(err, docs) {
+            if(err){
+                console.log(err);
+                return res.json({success:false, message:'error get infos user'});
+            }
+            console.log('ok' + docs)
+
+            if(docs.balance < resource.price ) {
+                return res.json({success:false, message:'insufficient balance'});
+            }else if(docs.nbresource == 10) {
+                return res.json({success:false, message:'number of resources equal to 10'});
+            }else if(docs.block) {
+                return res.json({success:false, message:'member is blocked and cannot borrow resources'});
+            } 
+            else {
+                if (docs.subscribe) {//if subscribe 30% reductions 
+                    var price = Math.floor(resource.price * ( 1 - (30/100)));
+                    console.log(price);
+                } else{
+                    var price = resource.price;
                 }
-            )
-        return res.json({ success: true, message: "password modified"}); 
+                docs.balance = docs.balance - price;
+                docs.nbresource = docs.nbresource + 1;
+                docs.save();
+                LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id } }, {new: true, upsert: true},
+                    function (error, success) {
+                          if (error) {
+                              console.log(error);
+                          } else {
+                              console.log(success);
+                          }});
+                ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: true, idmember:docs._id } } ,
+                    function (error, success) {
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log(success);
+                        }
+                    }
+                );
+            return res.json({success: true, message: 'the resource was borrowed at a cost of '+ price});    
+            }
+        });
     } catch (err) {
-        return res.json({success: false, message: "error password not modified", err});
+        return res.json({success: false, message: "error resource not borrowed", err});
    }
 };
