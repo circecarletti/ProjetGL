@@ -3,6 +3,7 @@ const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
 const ManagerModel = require('../models/manager.model');
 const LoanModel = require('../models/loan.model');
+const ResourceModel = require('../models/resource.model');
 
 
 //informations user 
@@ -354,19 +355,36 @@ module.exports.updatePassword = async (req, res) => {
 //rent a resource //louer une resource
 module.exports.rentResource = async (req, res) => {
     const email = req.body.id;
-    const idResource = req.body.idResource;
+    const idResource = req.body.idresource;
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
+
+    if(!(await ResourceModel.exists({ id: idResource})))
+        return res.json({success:false, message:'resource does not exist'});
     
     try {
-        Order.findOne({'_id' : id})
-        .select('client.phone client.email orderdetails.status reference')
-        .exec(function(err, order) {
-          //
+        const resource = await ResourceModel.findOne({ id : idResource}, ' id -_id -__v');
+
+        if (resource.loan)
+            return res.json({success:false, message:'resource is already borrowed'});
+
+        const user = await AdultMemberModel.findOne({ id : email}, 'member -_id -__v')
+        .populate({path:'member', select: 'balance nbresource subscribe -_id -__v'})
+        .exec(function(err) {
+          if(err){
+              console.log(err);
+              return res.json({success:false, message:'error get infos user'});
+            }
         });
-        if(MemberModel)
+
+        if(user.nbresource >= 10)
+            return res.json({success:false, message:'number of resources greater than or equal to 10'});
+
+       // if(){
+
+
 
         await MemberModel.findOneAndUpdate(
                 {id: email}, 

@@ -247,6 +247,7 @@ module.exports.createResource = async (req, res) => {
         author: req.body.author, 
         releasedate: req.body.releasedate,
         type: req.body.type,
+        price: req.body.price,
         resume: (req.body.resume) ? req.body.resume : '',
         synopsis: (req.body.synopsis) ? req.body.synopsis : ''
     });

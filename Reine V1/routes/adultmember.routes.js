@@ -39,7 +39,7 @@ router.put('/buyMembership', adultMemberController.buyMembership);
 //router.put('/renewMembership', adultMemberController.renewMembership);
 
 //rent a resource
-//router.put('/rentResource', adultMemberController.rentResource);
+router.put('/rentResource', adultMemberController.rentResource);
 
 //route update password
 //router.put('/updatePassword', userController.updatePassword);

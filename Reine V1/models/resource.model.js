@@ -66,6 +66,12 @@ const resourceSchema = new mongoose.Schema(
             maxlength: 1000, 
             minlength:0,
             trim: true
+        },
+        price: {
+            type: Number,
+            min: 1,
+            max: 500,
+            required: true
         }
     }
 )
