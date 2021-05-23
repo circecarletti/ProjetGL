@@ -36,9 +36,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 
+
 //routes init
 app.get('/', (req, res) => {
-    res.json({ msg: "Hello on est dans l'api"});
+    res.json({msg: "Hello on est dans l'api"});
 });
 
 //check auth adult member - child member - manager or unkonw return success and statut user 

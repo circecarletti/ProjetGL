@@ -14,13 +14,13 @@ module.exports.userInfo = async (req, res) => {
         return res.json({success:false, message:'email not in database'});
     try {
         //adult  
-        await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
-            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")
+        await AdultMemberModel.findOne({ id : email}, 'childlist id age -_id')
+            .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")
             .exec(function(err, docs){
                 if(err){
                     return res.json({success: false, message : ' error get info adultmember', err});
                 }
-                res.json({success: true, message:'success get adultmember info', docs});
+                return res.json({success: true, message:'success get adultmember info', docs});
             });
     }catch(err){
         console.log(err);
@@ -35,21 +35,25 @@ module.exports.getChildInfo = async (req, res) => {
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
+    console.log('ok 1')
     try {
         //adult  
-        console.log('ok')
-        await AdultMemberModel.findOne({ id : email})
-        .populate({path:'childList', populate:[{path:'member'}]})
-        .select('childList -_id -__v')
+        console.log('ok 2')
+        await AdultMemberModel.findOne({ id : email}, '-_id -__v')
+        .populate({path:'childlist', model:'childmember', select: 'id age -_id -__v',  populate:[{path:'member', model:'member', select: 'balance -_id -__v'}]})
         .exec(function(err, docs){
-                if(err){
-                    return res.json({success: false, message : ' error get info childinfo', err});
-                }
-                return res.json({success: true, message:'success  get info childinfo', docs});
-            });
+            if(err){
+                console.log('ok 3')
+
+                return res.json({success: false, message : ' error get info childinfo', err});
+            }
+            console.log('ok 4')
+
+            return res.json({success: true, message:'success get info childinfo', docs});
+        });
     }catch(err){
         console.log(err);
-        return res.json({success: false, message : ' error  get info childinfo', err});
+        return res.json({success: false, message : 'error get info childinfo', err});
     }
 };
 
@@ -63,23 +67,23 @@ module.exports.getLoanInfo = async (req, res) => {
     try {
         //adult  
         await AdultMemberModel.findOne({ id : email}, ' ')
-        .populate({path:'childList', model: childmember, populate:[{path:'member', model:member}]})
+        .populate({path:'childlist', model: childmember, populate:[{path:'member', model:member}]})
         .exec(function(err, docs){
                 if(err){
                     return res.json({success: false, message : ' error get info childinfo', err});
                 }
-                res.json({success: true, message:'success  get info childinfo', docs});
+                res.json({success: true, message:'success get info childinfo', docs});
             });
     }catch(err){
         console.log(err);
-        return res.json({success: false, message : ' error  get info childinfo', err});
+        return res.json({success: false, message : 'error get info childinfo', err});
     }
 };
 
 //signup childmember
 //fonction creerCompteMineur
 module.exports.signUpChild = async (req, res) => {
-    const {id, password, name, firstName, age, adultMember} = req.body
+    const {id, password, name, firstname, age, adultmember} = req.body
 
     try {
         //verifiy id not in manager collection
@@ -87,16 +91,16 @@ module.exports.signUpChild = async (req, res) => {
             return res.json({success: false, message: 'ID manager existed'}); 
 
         //check existence of adultmember
-        const userExists = await AdultMemberModel.exists({ id : adultMember }); 
+        const userExists = await AdultMemberModel.exists({ id : adultmember }); 
 
         if(userExists){
             //creating member
-            const member = await MemberModel.create({id, password, name, firstName, statut:'childmember'});
+            const member = await MemberModel.create({id, password, name, firstname, statut:'childmember'});
 
             //creating child member
-            const user = await ChildMemberModel.create({id:id, age,adultMember:adultMember, member});
+            const user = await ChildMemberModel.create({id:id, age,adultmember:adultmember, member});
 
-            const loan = await LoanModel.create({idAdherent: member._id});
+            const loan = await LoanModel.create({idadherent: member._id});
         
             await MemberModel.findOneAndUpdate({id:id}, {loan: loan._id},{new:true, upsert: true}, function(err, docs){
                 if (err){
@@ -107,8 +111,8 @@ module.exports.signUpChild = async (req, res) => {
             });
 
             AdultMemberModel.findOneAndUpdate(
-                { id: adultMember }, 
-                { $push: { childList: user._id } },
+                { id: adultmember }, 
+                { $push: { childlist: user._id } },
                function (error, success) {
                     if (error) {
                          console.log( error);
@@ -192,10 +196,10 @@ module.exports.updateName = async (req, res) => {
    }
 };
 
-//update firstName
+//update firstname
 module.exports.updateFirstName = async (req, res) => {
     const email = req.body.id;
-    const firstName = req.body.firstName;
+    const firstname = req.body.firstname;
 
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
@@ -206,17 +210,17 @@ module.exports.updateFirstName = async (req, res) => {
                 {id: email}, 
                 {
                     $set: {
-                        firstName: firstName
+                        firstname: firstname
                     }
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.json({success: false, message: "firstName not modified",  err});
+                    if(err) return res.json({success: false, message: "firstname not modified",  err});
                 }
             );
-        return res.json({success: true, message: "firstName modified"}); 
+        return res.json({success: true, message: "firstname modified"}); 
     } catch (err) {
-        return res.json({success: false, message: "error firstName not modified", err});
+        return res.json({success: false, message: "error firstname not modified", err});
    }
 };
 
@@ -301,7 +305,7 @@ module.exports.buyMembership = async (req, res) => {
                         balance: Number(-100)
                     },
                     $set: {
-                        dateSubscription: new Date, 
+                        datesubscription: new Date, 
                         subscribe: true
                     }
                 },
@@ -412,7 +416,7 @@ module.exports.renewMembership = async (req, res) => {
                         balance: Number(-100)
                     },
                     $set: {
-                        dateSubscription: new Date, 
+                        datesubscription: new Date, 
                         subscribe: true
                     }
                 },

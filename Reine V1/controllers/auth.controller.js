@@ -16,18 +16,18 @@ const createToken = (id) => {
 //signup member
 //fonction inscription 
 module.exports.signUp = async (req, res) => {
-    const {id, password, name, firstName, age, balance} = req.body
+    const {id, password, name, firstname, age, balance} = req.body
 
     try {
         //verifiy id not in manager collection
         if (await ManagerModel.exists({ id: id}))
             return res.json({success: false, message: 'ID existed'}); 
         //creating member 
-        const member = await MemberModel.create({id:id, password: password, name: name, firstName: firstName, balance: balance, statut: 'adultmember'});
+        const member = await MemberModel.create({id:id, password: password, name: name, firstname: firstname, balance: balance, statut: 'adultmember'});
         //creating adultmember,  member included in adultmember
         const user = await AdultMemberModel.create({ id: id, age: age, member: member}); 
 
-        const loan = await LoanModel.create({idAdherent: member._id});
+        const loan = await LoanModel.create({idadherent: member._id});
         
         await MemberModel.findOneAndUpdate({id:id}, {loan: loan._id},{new:true, upsert: true}, function(err, docs){
             if (err){
@@ -46,7 +46,7 @@ module.exports.signUp = async (req, res) => {
            return res.json({ success: false, message: 'ID existed' , err});
         }else if(err.errors && err.errors.name){
             return res.json({ success: false, message: 'error with name' , err});
-        }else if(err.errors && err.errors.firstName){
+        }else if(err.errors && err.errors.firstname){
             return res.json({ success: false, message: 'error with fistName' , err});
         }else if(err.errors && err.errors.age){
             return res.json({ success: false, message: 'error with age' , err});
@@ -65,9 +65,9 @@ module.exports.signIn = async (req, res) => {
     try{
         //if email is a member 
         if(await MemberModel.exists({ id: id})) {
-            const userpb = await MemberModel.findOne({id: id}).select('block nbFailConnection id -_id');
+            const userpb = await MemberModel.findOne({id: id}).select('block nbfailconnexion id -_id');
             //check if user is block
-            if(userpb.block || userpb.nbFailConnection == 10) {
+            if(userpb.block || userpb.nbfailconnexion == 10) {
                 return res.json({success: false, message: 'user is block please contact manager'});
             }
             //login
@@ -97,14 +97,14 @@ module.exports.signIn = async (req, res) => {
             res.json({ success: false, message: 'email unknow', err});
         } else if(err.message.includes('password')) {
             //password incorrect
-            //if it is an incorrect password and it is a member increment nbFailConnection
+            //if it is an incorrect password and it is a member increment nbfailconnexion
             if (await MemberModel.exists({id: id})){
-                const userpb = await MemberModel.findOne({id: id}).select('block nbFailConnection id -_id');
-                if ((userpb.nbFailConnection == 9)){
+                const userpb = await MemberModel.findOne({id: id}).select('block nbfailconnexion id -_id');
+                if ((userpb.nbfailconnexion == 9)){
                     MemberModel.updateOne(
                         { id: id }, 
                         {
-                            $inc: { nbFailConnection: 1 },
+                            $inc: { nbfailconnexion: 1 },
                             $set: { block: true }
                         }, {upsert: true}, function(err) {
                             if(err)
@@ -116,7 +116,7 @@ module.exports.signIn = async (req, res) => {
                         { id: userpb.id }, 
                         {
                             $inc: {
-                                nbFailConnection: 1
+                                nbfailconnexion: 1
                             }
                         },
                         {upsert: true}, function(err) {
@@ -137,6 +137,5 @@ module.exports.signIn = async (req, res) => {
 //logout user
 module.exports.logout = async (req, res) => {
     res.cookie('jwt', '', { maxAge: 1}); // cookie set time to 1milisseconds not valid anymore logout member
-    res.json({ success: true, message: 'success logout', err});
     res.redirect('/');
 }

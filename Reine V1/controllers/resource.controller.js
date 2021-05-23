@@ -69,7 +69,7 @@ module.exports.SearchByFilter = async (req, res) => {
         return res.json({success: false, message : 'error params'});
     }
 
-    const { title, author, releaseDate } = req.query 
+    const { title, author, releasedate } = req.query 
     console.log(req.query)
 
     var query = {};
@@ -108,9 +108,9 @@ module.exports.SearchByFilter = async (req, res) => {
             queryCategory["$or"].push( { "category" : req.query.category_allpublic} );
         }
     }
-    if(releaseDate) {
-        if (!(releaseDate == 0)) {
-            query.releaseDate = releaseDate;
+    if(releasedate) {
+        if (!(releasedate == 0)) {
+            query.releasedate = releasedate;
         }
     }
     if(req.query.type_livre) {

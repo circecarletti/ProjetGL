@@ -4,7 +4,7 @@ const MemberModel = require('../models/member.model');
 //signup manager
 module.exports.signUpManager = async (req, res) => {
     //console.log(req.body);
-    const {id, password, name, firstName} = req.body
+    const {id, password, name, firstname} = req.body
 
     try {
         //verifiy id not in members collection
@@ -12,7 +12,7 @@ module.exports.signUpManager = async (req, res) => {
             return res.json({success:false, message:'ID existed'});
 
         //creating manager user
-        const user = await ManagerModel.create({ id, password, name, firstName });
+        const user = await ManagerModel.create({ id, password, name, firstname });
         console.log('Manager successfully created!'); 
         return res.json({success: true, user: user.id}); 
     }

@@ -12,12 +12,12 @@ module.exports.userInfo = async (req, res) => {
 
         //child
         await ChildMemberModel.findOne({ id : email}, '-__v -_id')
-        .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")
+        .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")
         .exec(function(err, docs){
             if(err){
                 return res.json({success: false, message : 'get child info ok', err});
             }
-                return res.json({success: true, message:'error get child info', docs});
+                return res.json({success: true, message:'success get child info', docs});
         });
     }catch(err){
         console.log(err);
@@ -56,10 +56,10 @@ module.exports.updateName = async (req, res) => {
    }
 };
 
-//update firstName
+//update firstname
 module.exports.updateFirstName = async (req, res) => {
     const email = req.body.id;
-    const firstName = req.body.firstName;
+    const firstname = req.body.firstname;
 
     //check if email is in the database
     if(!(await ChildMemberModel.exists({ id: email})))
@@ -70,17 +70,17 @@ module.exports.updateFirstName = async (req, res) => {
                 {id: email}, 
                 {
                     $set: {
-                        firstName: firstName
+                        firstname: firstname
                     }
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.json({success: false, message: "firstName not modified",  err});
+                    if(err) return res.json({success: false, message: "firstname not modified",  err});
                 }
             );
-        return res.json({ success: true, message: "firstName modified"}); 
+        return res.json({ success: true, message: "firstname modified"}); 
     } catch (err) {
-        return res.json({success: false, message: "error firstName not modified", err});
+        return res.json({success: false, message: "error firstname not modified", err});
    }
 };
 

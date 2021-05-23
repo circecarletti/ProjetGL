@@ -3,6 +3,7 @@ const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
 const ResourceModel = require('../models/resource.model');
 const LoanModel = require('../models/loan.model');
+const ManagerModel = require('../models/manager.model');
 
 //informations user 
 module.exports.userInfo = async (req, res) => {
@@ -36,7 +37,7 @@ module.exports.getUsersInfo = async (req, res) => {
     //adult  
     if(await AdultMemberModel.exists({id: email})){
          await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
-            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")  
+            .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")  
             .then(function(docs){
                 console.log('mail ' + email);
                 return res.json({success: true, message: 'success get user info',docs});
@@ -48,7 +49,7 @@ module.exports.getUsersInfo = async (req, res) => {
     //child
     else if(await ChildMemberModel.exists({id: email})){
         await ChildMemberModel.findOne({ id : email}, '-__v -_id')
-            .populate('member', "-dateSubscription -password -nbFailConnection -id -__v -_id")   
+            .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")   
             .then(function(docs){
                 return res.json({success:true, message:'success get user info', docs});
             })
@@ -130,7 +131,7 @@ module.exports.updateName = async (req, res) => {
 //update firstName
 module.exports.updateFirstName = async (req, res) => {
     const email = req.body.id;
-    const firstName = req.body.firstName;
+    const firstname = req.body.firstname;
 
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
@@ -141,21 +142,21 @@ module.exports.updateFirstName = async (req, res) => {
                 {id: email}, 
                 {
                     $set: {
-                        firstName: firstName
+                        firstname: firstname
                     }
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},
                 (err,docs) => {
-                    if(err) return res.json({success: false, message: "firstName not modified",  err});
+                    if(err) return res.json({success: false, message: "firstname not modified",  err});
                 }
             );
-        return res.json({ success: true, message: "firstName modified"}); 
+        return res.json({ success: true, message: "firstname modified"}); 
     } catch (err) {
-        return res.json({success: false, message: "error firstName not modified", err});
+        return res.json({success: false, message: "error firstname not modified", err});
    }
 };
 
-//update firstName
+//update firstname
 module.exports.updateAge = async (req, res) => {
     const email = req.body.id;
     const age = req.body.age;
@@ -244,7 +245,7 @@ module.exports.createResource = async (req, res) => {
         title: req.body.title,
         category: req.body.category,
         author: req.body.author, 
-        releaseDate: req.body.releaseDate,
+        releasedate: req.body.releasedate,
         type: req.body.type,
         resume: (req.body.resume) ? req.body.resume : '',
         synopsis: (req.body.synopsis) ? req.body.synopsis : ''
@@ -305,7 +306,7 @@ module.exports.deleteUser = async (req, res) => {
             return res.json({success: false, message: 'member not delete member is lock'});
 
         const id = await MemberModel.findOne({id: email}).select('_id');
-        await LoanModel.remove({idAdherent: id._id}).exec();  //remove loan associate to member
+        await LoanModel.remove({idadherent: id._id}).exec();  //remove loan associate to member
         await MemberModel.remove({id: email}).exec();  //remove member
 
         if(await AdultMemberModel.exists({id: email})){
