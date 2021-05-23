@@ -40,6 +40,7 @@ module.exports.getChildInfo = async (req, res) => {
         console.log('ok')
         await AdultMemberModel.findOne({ id : email})
         .populate({path:'childList', populate:[{path:'member'}]})
+        .select('childList -_id -__v')
         .exec(function(err, docs){
                 if(err){
                     return res.json({success: false, message : ' error get info childinfo', err});
