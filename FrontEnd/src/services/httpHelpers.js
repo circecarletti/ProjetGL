@@ -126,9 +126,46 @@ const sendPut = (url, body) => {
 };
 
 
+const sendDelete = (url, paramsArray) => {
+    // console.log("tableau sendDelete (httpHelpers) : ", paramsArray);
+
+    let fullUrl = '';
+    if (Array.isArray(paramsArray) && paramsArray.length > 0) {
+        let paramsString = '?';
+        paramsArray.forEach( param => {
+            paramsString = paramsString + `${param.name}=${param.value}&`;
+            // console.log("param : ", param, "paramsString : ", paramsString)
+        });
+        fullUrl = url + paramsString.substr(0, paramsString.length - 1);
+    } else {
+        fullUrl = url;
+    }
+
+    const payload = {
+        headers: { 
+            "content-type": "application/json; charset=UTF-8",
+        },
+        method: 'DELETE'
+    };
+
+    // console.log("paylod du senDelete (httpHelpers) : ",payload);
+
+    return fetch(fullUrl, payload).
+        then( response => {
+            // console.log("Delete response : ", response);
+            if (response.ok) {
+                return response.json();
+            } else {
+                return Promise.reject( { code: response.status, message: response.statusText } );
+            }
+        });
+};
+
+
 export {
     sendPost,
     sendGet,
     sendFile,
-    sendPut
+    sendPut,
+    sendDelete
 }

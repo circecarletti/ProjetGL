@@ -214,8 +214,8 @@ export default {
                 openModal(this, 'theModalError', `Les données pour la création d'un compte pour mineur sont incorrectes.`);
             } else {
                 const newChildAccount = {
-                    name: this.newAccountLastName,
-                    firstname: this.newAccountFirstName,
+                    name: this.newAccountLastName.toLowerCase(),
+                    firstname: this.newAccountFirstName.toLowerCase(),
                     age: this.newAccountAge,
                     id: this.newAccountEmail,
                     status : 'childmember',

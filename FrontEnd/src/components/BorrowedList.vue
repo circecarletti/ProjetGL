@@ -132,9 +132,10 @@ export default {
         sendGet(url).
             then( response => {
                 if(response.success){
-                    // console.log("liste d'emprunts : ", response.docs.member.loan.idresources);
-                    const items = response.docs.member.loan.idresources.map( fullItem => {
-                        return { id: fullItem.id, title: fullItem.titre, releaseDate: fullItem.annee, author: fullItem.auteur };
+                    const listOfResources = response.docs.member.loan.idresources;
+                    console.log("liste d'emprunts : ", listOfResources);
+                    const items = listOfResources.map( fullItem => {
+                        return { id: fullItem.id, title: fullItem.title, releaseDate: fullItem.releasedate, author: fullItem.author };
                     });
                     this.borrowedItems = items;
                     this.dataError = false;

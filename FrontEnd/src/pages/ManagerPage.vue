@@ -46,6 +46,7 @@ import ThePanel from '../components/Panel.vue';
 import TheStore from '@/store/index.js';
 import { sendGet } from '../services/httpHelpers.js';
 import { openModal } from '../components/Modal.vue';
+import { translateStatus } from '../services/utils.js'
 
 export default {
     components: {
@@ -122,40 +123,30 @@ export default {
             }
 
             this.searchingCustomers = true;
-            // Ici normalement, on appelle le service qui renvoie les données
+            // Ici, on appelle le service qui renvoie les données
             // de la recherche des adhérents
-            // Donnee dummy valorisées dans le "then", comme la partie 
-            // qui définie les fonctionalités utilisables.
-            sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/users.json').
+            sendGet('https://orsaymediatheque.herokuapp.com/api/user/manager/getUsersInfo/info', [{name: 'name', value : searchCriteria.simpleCriteria}]).
                 then( response => {
-                    // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                    // QUE les/le adhérent(s) correspondant à la recherche.
-                    const customers = response.filter( customer => {
-                            if (typeof criteria.id !== 'undefined') {
-                                // filtre par id
-                                return customer.id === criteria.id && customer.type === 'client';
-                            } else {
-                                // Filtre par nom/prénom
-                                return customer.type === 'client' && ( 
-                                    customer.name.search(criteria.regEx) !== -1 ||
-                                    customer.firstname.search(criteria.regEx) !== -1)
-                            }
-                        }).map( keptCustomer => {
+                    if(response.success){
+                        
+                        console.log("users list : ", response.docs);
+                        const customersPres = response.docs.map(cust =>{
                             return {
-                                title: keptCustomer.name + ', ' + keptCustomer.firstname,
-                                image: '/images/face.jpg',
-                                // On envoie sur la première fonctionalité du paneau car c'est elle 
-                                // qui est considérée comme "active" lors de l'affichage initial
-                                url: `/customer/${keptCustomer.id}/update`, 
+                                title: cust.name + ', ' + cust.firstname,
+                                image : cust.picture,
+                                url: `/customer/${cust.id}/update`, 
                                 lines: [ 
-                                    `email : ${keptCustomer.email}`,
-                                    `Age : ${keptCustomer.age}`,
-                                    `Solde : ${keptCustomer.balance} €`,
+                                    `email : ${cust.id}`,
+                                    `statut : ${translateStatus(cust.statut)}`,
                                 ]
-                            };
+                            }
                         });
+                        this.customersResult = customersPres;
+                    }else{
+                        console.log("Error in getting users list : ", response.message);
+                    }
+                    
                     this.searchingCustomers = false;
-                    this.customersResult = customers;
 
                 }).catch( error => {
                     openModal(this, 'manager-error-modal', `erreur lors de la recherche de l'adhérent : ${error.message}`);

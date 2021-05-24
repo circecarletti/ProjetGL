@@ -3,7 +3,7 @@
         <div class="picture-area">
             <h3>{{title}}</h3>
             <div class="picture">
-                <img src="/images/genericCover.jpg">
+                <img :src="'/' + urlImage">
             </div>
         </div>
         <div class="text-area">
@@ -35,7 +35,7 @@
             </div>
             <div class="line actions">
                 <button type="button" @click="goBack()">Retour</button>
-                <button type="button" v-if="userIsCustomer && available" @click="borrow">Emprunter</button>
+                <button type="button" v-if="userIsCustomerOrChild && available" @click="borrow">Emprunter</button>
                 <button type="button" v-if="userIsManager" @click="deleteItem">Supprimer</button>
             </div>
         </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import {sendGet} from '../services/httpHelpers.js';
+import {sendDelete, sendGet, sendPut} from '../services/httpHelpers.js';
 import { openModal } from '../components/Modal.vue';
 
 export default {
@@ -63,7 +63,7 @@ export default {
             dataError: false,
             id: 0,
             title: '',
-            url: '',
+            urlImage: '',
             type: '',
             resume: '',
             author: '',
@@ -75,7 +75,7 @@ export default {
 
     computed: {
         userIsCustomerOrChild() {
-            return this.$store.getters['isUserCustomer'] || this.$$store.getters['isUserChild'];
+            return this.$store.getters['isUserCustomer'] || this.$store.getters['isUserChild'];
         },
         userIsManager() {
             return this.$store.getters['isUserManager'];
@@ -84,29 +84,87 @@ export default {
 
     
     methods: {
+
+        translateType(type){
+            switch (type){
+                case 'book': 
+                    return 'livre';
+                case 'dvd' :
+                    return 'DVD';
+                case 'cd' : 
+                    return 'CD';
+                case 'videogames' : 
+                    return 'Jeux Videos'; 
+                default :
+                    return 'inconnu';
+            }
+        },
+
+        translateCategory(cat){
+            switch (cat){
+                case 'childmember': 
+                    return 'enfant';
+                case 'adultmember' :
+                    return 'adulte';
+                case 'allpublic' : 
+                    return 'tous public';
+                default : 
+                    return 'inconnu'; 
+            }
+        },
+
         goBack() {
             this.$router.back();
         },
 
         borrow() {
             if (this.available) {
-                // ICI APPELER le service côté serveur, permettant d'emprunter
-                // et dans le "then" de la promise faire
-                this.goBack();
-                // Dans le catch de la promise, il faut juste afficher le message
-                // d'erreur en provenance du serveur
-                // openModal(this, 'resource-error-modal', 'Le message en provenance du serveur');
+                const borrowSend = {
+                    id : this.$store.getters['userId'],
+                    idresource : this.id,
+                }
+
+                let url = '';
+                if(this.$store.getters['isUserChild']){
+                    url = 'https://orsaymediatheque.herokuapp.com/api/user/childmember/rentResource';
+                }else{
+                    url = 'https://orsaymediatheque.herokuapp.com/api/user/adultmember/rentResource';
+                }
+                sendPut(url, borrowSend).
+                    then( response => {
+                        if(response.success){
+                            openModal(this, 'resource-success-modal', 'Ressource empruntée.');
+                            this.goBack();
+                        }else{
+                            console.log("Error in borrowing resource : ", response.message);
+                            openModal(this, 'resource-error-modal', 'Titre indisponible');
+                        }
+                    }).catch( error => {
+                        this.dataError = true;
+                        this.waiting = false;
+                        console.error(error);
+                    });
             } else {
                 openModal(this, 'resource-error-modal', 'Titre indisponible');
             }
         },
 
         deleteItem() {
-            // Appeler ici le service de suppression et dans le then de la promise, faire
-            openModal(this, 'resource-success-modal', 'Le titre a bien été supprimé.');
-            // Dans le catch de la promise, il faut juste afficher le message
-            // d'erreur en provenance du serveur
-            // openModal(this, 'resource-error-modal', 'Le message en provenance du serveur');
+            sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/deleteResource/${this.id}`).then(response => {
+                    if(response.success){
+                        openModal(this, 'resource-success-modal', 'La ressource a bien été supprimé.');
+                            this.dataError = false;
+                    }else{
+                        console.log("Error in deleting ressources", response.message);
+                        openModal(this, 'resource-error-modal', "La ressource n'a pas pu être supprimé.");
+                        this.dataError = true;
+                    }
+                    this.waiting = false;
+                }).catch( error => {
+                            this.dataError = true;
+                            this.waiting = false;
+                            console.error(error);
+                        });
         }
     },
 
@@ -117,19 +175,23 @@ export default {
         sendGet(`https://orsaymediatheque.herokuapp.com/api/resource/${this.id}`).
             then( response => {
                 if(response.success){
+                    console.log("ressource : ", response);
                     const resource = response.docs;
                     this.dataError = false;
                     this.waiting = false;
 
                     this.id= resource.id;
-                    this.title= resource.titre;
-                    this.url= resource.url;
-                    this.type= resource.type;
-                    this.resume= resource.synopsis;
-                    this.author= resource.auteur;
-                    this.releaseDate= resource.annee;
-                    this.available= resource.disponible;
-                    this.cathegory= resource.categorie;
+                    this.title= resource.title;
+                    this.urlImage= resource.picture;
+                    this.type= this.translateType(resource.type);
+                    this.resume= resource.resume;
+                    this.synopsis = resource.synopsis;
+                    this.author= resource.author;
+                    this.releaseDate= resource.releasedate;
+                    this.available= !resource.loan;
+                    this.cathegory= this.translateCategory(resource.category);
+                }else{
+                    console.log("Error in getting ressource : ", response.message);
                 }
             }).
             catch( error => {

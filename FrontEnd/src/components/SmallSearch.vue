@@ -72,7 +72,6 @@ export default {
     
     methods: {
         onSearch(event) {
-            console.log('onSearch', event);
             this.$emit('searchCriteria', event);
         }
     }

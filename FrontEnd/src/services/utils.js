@@ -5,6 +5,20 @@ const regexStringFormulaForBalance = `^[0-9][0-9]*[\\.]{0,1}[0-9]{0,2}$`;
 
 const regexStringFormulaForAge = `^[1-9][0-9]*$`;
 
+const translateStatus = function(status) {
+    switch (status) {
+        case 'childmember' :
+            return 'enfant';
+        case 'adultmember' :
+            return 'adulte' ;
+        case 'manager' : 
+            return 'gestinnaire';
+        default : 
+            return 'inconnus';
+    }
+};
+
+
 const manageValidityMessage =
     function(element, message) {
         if (element) {
@@ -33,5 +47,6 @@ export {
     regexStringFormulaForBalance,
     regexStringFormulaForAge,
     manageValidityMessage,
-    positiveNumberDecimalCheck
+    positiveNumberDecimalCheck,
+    translateStatus
 };
