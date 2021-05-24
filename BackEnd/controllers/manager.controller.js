@@ -28,45 +28,87 @@ module.exports.userInfo = async (req, res) => {
 };
 
 //informations user 
-module.exports.getUsersInfo = async (req, res) => {
+module.exports.getUserInfo = async (req, res) => {
     const email = req.params.id;
 
     //check if email is in the database
-    if(!(await MemberModel.exists({ id: email}) || await ManagerModel.exists({ id: email})))
+    if(!(await MemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
-    
-    //adult  
-    if(await AdultMemberModel.exists({id: email})){
-         await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
-            .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")  
-            .then(function(docs){
-                console.log('mail ' + email);
-                return res.json({success: true, message: 'success get user info',docs});
-            })
-            .catch(function(err) {
-                return res.json({success: true, message : 'error email', err});
-            });
+    try{
+        //adult  
+        if(await AdultMemberModel.exists({id: email})){
+            await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
+                .populate('member', " -password -id -__v -_id")  
+                .then(function(docs){
+                    console.log('mail ' + email);
+                    return res.json({success: true, message: 'success get user info',docs});
+                })
+                .catch(function(err) {
+                    return res.json({success: false, message : 'error email', err});
+                });
+        }
+        //child
+        else {
+            await ChildMemberModel.findOne({ id : email}, '-__v -_id')
+                .populate('member', " -password -id -__v -_id")   
+                .then(function(docs){
+                    return res.json({success:true, message:'success get user info', docs});
+                })
+                .catch(function(err) {
+                    return res.json({success: false, message : 'error email', err});
+                });
+            }
+    }catch(err){
+        return res.json({success: false, message : 'error get users info', err});
     }
-    //child
-    else if(await ChildMemberModel.exists({id: email})){
-        await ChildMemberModel.findOne({ id : email}, '-__v -_id')
-            .populate('member', "-datesubscription -password -nbfailconnexion -id -__v -_id")   
-            .then(function(docs){
-                return res.json({success:true, message:'success get user info', docs});
-            })
-            .catch(function(err) {
-                return res.json({success: true, message : 'error email', err});
+};
+
+
+//informations user 
+module.exports.getUserLoanInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await MemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+    try {
+        //adult  
+        await MemberModel.findOne({ id : email}, '-_id -id -age -childlist -__v')
+        .populate({ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]})
+        .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get loan info', err});
+                }
+                res.json({success: true, message:'success get loan info', docs});
             });
+    }catch(err){
+        console.log(err);
+        return res.json({success: false, message : 'error get loan info', err});
     }
-    else { // manager
-        await ManagerModel.findOne({id : email }, '-password -__v -_id')
-            .then(function(docs){
-                return res.json({success:true, message: 'success get info', docs});
-            })
-            .catch(function(err) {
-                return res.json({success : false, message : 'error email', err});
-            });
-    };
+};
+
+//informations user 
+module.exports.getUserChildInfo = async (req, res) => {
+    const email = req.params.id;
+
+    //check if email is in the database
+    if(!(await AdultMemberModel.exists({ id: email})))
+        return res.json({success:false, message:'email not in database'});
+
+    try {
+        //adult  
+        await AdultMemberModel.findOne({ id : email}, '-member -_id -id -age -__v')
+        .populate({path:'childlist', select:'id age', populate:[{path:'member', select:'balance name firstname '}]})
+        .exec(function(err, docs){
+            if(err){
+                return res.json({success: false, message : ' error get childinfo', err});
+            }
+            return res.json({success: true, message:'success get childinfo', docs});
+        });
+    } catch(err){
+        console.log(err);
+        return res.json({success: false, message : 'error childinfo get', err});
+    }
 };
 
 
@@ -302,25 +344,54 @@ module.exports.deleteUser = async (req, res) => {
     
     try {
         //verify if member is lock
-        const lock = await MemberModel.findOne({id: email}).select('block -_id');
-        console.log(lock);
-        if(lock.lock) 
-            return res.json({success: false, message: 'member not delete member is lock'});
+        const user = await MemberModel.findOne({id: email});
 
-        const id = await MemberModel.findOne({id: email}).select('_id');
-        await LoanModel.remove({idadherent: id._id}).exec();  //remove loan associate to member
-        await MemberModel.remove({id: email}).exec();  //remove member
+        if(user.balance < 0) 
+            return res.json({success: false, message: 'cannot delete the member because the balance is negative'});
 
-        if(await AdultMemberModel.exists({id: email})){
-            await AdultMemberModel.remove({id: email}).exec();  //remove adult member
+        if(user.nbresource > 0) 
+            return res.json({success: false, message: 'cannot delete member beacause there are borrowed resources '});
+
+        if(user.lock) 
+            return res.json({success: false, message: 'cannot delete member beacause is lock'});
+
+        await LoanModel.deleteOne({idadherent: user._id})  //remove loan associate to member
+        await MemberModel.deleteOne({id: email}); //remove member
+
+        if(user.statut === 'adultmember'){
+            await AdultMemberModel.deleteOne({id: email});  //remove adult member
         }else {
-            await ChildMemberModel.remove({id: email}).exec();  //remove child  member
+            await ChildMemberModel.deleteOne({id: email});  //remove child  member
         }
-        return res.json({ success: true, message: "member deleted"}); 
+        return res.json({ success: true, message: "member successfully deleted"}); 
     } catch (err) {
         return res.json({success: false, message: "error deleting member", err});
    }
 };
+
+//deleteResource
+module.exports.deleteResource = async (req, res) => {
+    const id = req.params.id;
+
+    //check if email is in the database
+    if(!(await ResourceModel.exists({ id: id})))
+        return res.json({success:false, message:'resource not in database'});
+    
+    try {
+        //verify if member is lock
+        const resource = await ResourceModel.findOne({id: id});
+
+        if(resource.loan) 
+            return res.json({success: false, message: 'cannot delete the resource because it is borrowed'});
+
+        await ResourceModel.deleteOne({id: id})  //remove loan associate to member
+     
+        return res.json({ success: true, message: "resource deleted"}); 
+    } catch (err) {
+        return res.json({success: false, message: "resource not deleted", err});
+   }
+};
+
 
 //update password
 module.exports.updatePassword = async (req, res) => {
@@ -355,79 +426,6 @@ module.exports.updatePassword = async (req, res) => {
         return res.json({success: false, message: "password not modified", err});
    }
 };
-
-
-//rent a resource //louer une resource
-module.exports.rentResource = async (req, res) => {
-    const email = req.body.id;
-    const idResource = req.body.idresource;
-
-    //check if email is in the database
-    if(!(await MemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-
-    if(!(await ResourceModel.exists({ id: idResource})))
-        return res.json({success:false, message:'resource does not exist'});
-    
-    try {
-        const resource = await ResourceModel.findOne({ id : idResource});
-
-        console.log('ok' + resource)
-
-        if (resource.loan)
-            return res.json({success:false, message:'resource is already borrowed'});
-        
-        await MemberModel.findOne({ id : email})
-        .exec(function(err, docs) {
-            if(err){
-                console.log(err);
-                return res.json({success:false, message:'error get infos user'});
-            }
-            console.log('ok' + docs)
-
-            if(docs.balance < resource.price ) {
-                return res.json({success:false, message:'insufficient balance'});
-            }else if(docs.nbresource == 10) {
-                return res.json({success:false, message:'number of resources equal to 10'});
-            }else if(docs.block) {
-                return res.json({success:false, message:'member is blocked and cannot borrow resources'});
-            }else if(docs.statut === 'childmember' && resource.category === 'adult') {
-                return res.json({success:false, message:'resource for adult cannot be borrowed by a child'}); 
-            }
-            else {
-                if (docs.subscribe) {//if subscribe 30% reductions 
-                    var price = Math.floor(resource.price * ( 1 - (30/100)));
-                    console.log(price);
-                } else{
-                    var price = resource.price;
-                }
-                docs.balance = docs.balance - price;
-                docs.nbresource = docs.nbresource + 1;
-                docs.save();
-                LoanModel.findOneAndUpdate({id: docs.loan},{ $push: { idresources: resource._id }}, {new: true, upsert: true},
-                    function (err, success) {
-                          if (err) {
-                              console.log(err);
-                          } else {
-                              console.log(success);
-                          }});
-                ResourceModel.findOneAndUpdate({id: resource.id}, {$set: {loan: true, idmember:docs._id } } ,
-                    function (err, success) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            console.log(success);
-                        }
-                    }
-                );
-            return res.json({success: true, message: 'the resource was borrowed at a cost of '+ price});    
-            }
-        });
-    } catch (err) {
-        return res.json({success: false, message: "error resource not borrowed", err});
-   }
-};
-
 
 //rent a resource //louer une resource
 module.exports.rentResource = async (req, res) => {
@@ -524,14 +522,14 @@ module.exports.returnResource = async (req, res) => {
         }
 
         await LoanModel.findOneAndUpdate( 
-                { _id: user.loan }, 
-                { $pull: { idresources: ObjectId(objid._id) } }, 
-                { new: true }, 
-                function(err, docs) {
-                    if(err){
-                        console.log(err)
-                    }
-                } 
+            { _id: user.loan }, 
+            { $pull: { idresources: ObjectId(objid._id) } }, 
+            { new: true }, 
+            function(err, docs) {
+                if(err){
+                    console.log(err)
+                }
+            } 
         );
 
         await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null }}, {upsert: true} ,

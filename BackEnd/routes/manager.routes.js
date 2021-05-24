@@ -3,11 +3,20 @@ const managerController = require('../controllers/manager.controller');
 
 //routes for manager is https://orsaymediatheque.herokuapp.com/api/user/manager
 
-//get user info 
+//get managger info 
 router.get('/:id', managerController.userInfo);
 
-//delete user 
-//router.delete('/:id', managerController.deleteUser);
+//get users info
+router.get('/getUserInfo/:id', managerController.getUserInfo);
+
+//get user loan info
+router.get('/getUserLoanInfo/:id', managerController.getUserLoanInfo);
+
+//get Users Child Info
+router.get('/getUserChildInfo/:id', managerController.getUserChildInfo);
+
+//delete user member
+router.delete('/:id', managerController.deleteUser);
 
 //modifyBalance
 router.post('/modifyBalance', managerController.modifyBalance);
@@ -32,6 +41,9 @@ router.post('/createResource', managerController.createResource);
 
 //return a resource 
 router.put('/returnResource', managerController.returnResource);
+
+//delete Resource
+router.put('/deleteResource', managerController.deleteResource);
 
 //route update password
 router.put('/updatePassword', managerController.updatePassword);

@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const ChildMemberModel = require('../models/childmember.model');
 
-
 //adult member schema 
 const adultMemberSchema = new mongoose.Schema(
     {
