@@ -428,7 +428,7 @@ module.exports.updatePassword = async (req, res) => {
 };
 
 //rent a resource //louer une resource
-module.exports.rentResource = async (req, res) => {
+module.exports.addResourceToMember = async (req, res) => {
     const email = req.body.id;
     const idResource = req.body.idresource;
 
@@ -497,7 +497,7 @@ module.exports.rentResource = async (req, res) => {
 };
 
 //return a resource //retourner  une resource
-module.exports.returnResource = async (req, res) => {
+module.exports.deleteResourceToMember = async (req, res) => {
     const email = req.body.id;
     const idResource = req.body.idresource;
     console.log(idResource)
@@ -556,3 +556,50 @@ module.exports.returnResource = async (req, res) => {
         return res.json({success: false, message: "error returning the resource", err});
    }
 };
+
+
+
+//add Member
+//fonction ajouter adherent 
+module.exports.addMember = async (req, res) => {
+    const {id, password, name, firstname, age, balance} = req.body
+
+    try {
+        //verifiy id not in manager collection
+        if (await ManagerModel.exists({ id: id}))
+            return res.json({success: false, message: 'ID existed'}); 
+        //creating member 
+        const member = await MemberModel.create({id:id, password: password, name: name, firstname: firstname, balance: balance, statut: 'adultmember'});
+        //creating adultmember,  member included in adultmember
+        const user = await AdultMemberModel.create({ id: id, age: age, member: member}); 
+
+        const loan = await LoanModel.create({idadherent: member._id});
+        
+        await MemberModel.findOneAndUpdate({id:id}, {loan: loan._id},{new:true, upsert: true}, function(err, docs){
+            if (err){
+                console.log(err);
+            }else {
+                console.log("updated user docs ", docs);
+            }
+        });
+
+        console.log('Member successfully created!'); 
+        return res.json({ success: true, user: user.id }); 
+    }
+    catch(err) {
+        console.log(err)
+        if(err.code == 11000){
+           return res.json({ success: false, message: 'ID existed' , err});
+        }else if(err.errors && err.errors.name){
+            return res.json({ success: false, message: 'error with name' , err});
+        }else if(err.errors && err.errors.firstname){
+            return res.json({ success: false, message: 'error with fistName' , err});
+        }else if(err.errors && err.errors.age){
+            return res.json({ success: false, message: 'error with age' , err});
+        }else if(err.errors && err.errors.password){
+            return res.json({ success: false, message: 'error with password' , err});
+        }else {
+            return res.json({ success: false, message:'erreur signup', err });
+        }
+    }
+}
