@@ -4,7 +4,7 @@ const schedule = require('node-schedule'); //require node shedule for automatic 
 const userRoutes = require('./routes/user.routes.js');  // a suppr
 const resourceRoutes = require('./routes/resource.routes.js'); 
 
-//const ResourceModel = require('./models/resource.model');
+const ResourceModel = require('./models/resource.model');
 
 const adultMemberRoutes = require('./routes/adultmember.routes.js'); //routes adultmember
 const childMemberRoutes = require('./routes/childmember.routes.js'); //routes childmember
@@ -95,12 +95,17 @@ var test = schedule.scheduleJob({hour: 19, minute: 52}, function(){
     console.log('il est 19h52');
     console.log('il est 19h52');
 });
-/*
+
 //decrement days to loan member every day at 00h00
 var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, function(){
-   // await ResourceModel.find
+    ResourceModel.updateMany({loan: true}, {$inc: {loanday: Number(-1)}}, {upsert:true} ,
+    function (err) {
+        if (err){
+            console.log(err)
+        }
+    });
 });
-
+/*
 //add penalties to delayed loan member every day at 00h10
 var delayPenalties = schedule.scheduleJob({hour: 00, minute: 10}, function(){
     walk.on('dir', function (dir, stat) {

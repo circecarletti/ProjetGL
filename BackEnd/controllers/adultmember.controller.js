@@ -485,7 +485,7 @@ module.exports.returnResource = async (req, res) => {
                 } 
         );
 
-        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null }}, {upsert: true} ,
+        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null, loanday: Number(30) }}, {upsert: true} ,
             function (err, success) {
                 if (err) {
                     return res.json({success: false, message: "error modify resource", err});

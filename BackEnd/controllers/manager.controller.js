@@ -75,7 +75,6 @@ module.exports.addMember = async (req, res) => {
 
 //get infos users
 module.exports.getUsersInfo = async (req, res) => {
-    console.log('je suis la ')
     //if no query send with get 
     if (((req.query === {}) || (req.query.name === undefined ) || (req.query.name === '' ))) {
         return res.send({success: false, message: 'error params name users'});
@@ -583,7 +582,7 @@ module.exports.addResourceToMember = async (req, res) => {
 };
 
 //return a resource //retourner  une resource
-module.exports.deleteResourceToMember = async (req, res) => {
+module.exports.removeResourceToMember = async (req, res) => {
     const email = req.body.id;
     const idResource = req.body.idresource;
     console.log(idResource)
@@ -618,7 +617,7 @@ module.exports.deleteResourceToMember = async (req, res) => {
             } 
         );
 
-        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null }}, {upsert: true} ,
+        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null, loanday: Number(30) }}, {upsert: true} ,
             function (err, success) {
                 if (err) {
                     return res.json({success: false, message: "error modify resource", err});

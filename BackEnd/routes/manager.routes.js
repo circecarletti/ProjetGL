@@ -46,10 +46,10 @@ router.put('/addResourceToMember', managerController.addResourceToMember);
 router.post('/createResource', managerController.createResource);
 
 //return a resource 
-router.put('/deleteResourceToMember', managerController.deleteResourceToMember);
+router.put('/removeResourceToMember', managerController.removeResourceToMember);
 
 //delete Resource
-router.put('/deleteResource', managerController.deleteResource);
+router.delete('/deleteResource/:id', managerController.deleteResource);
 
 //route update password
 router.put('/updatePassword', managerController.updatePassword);
