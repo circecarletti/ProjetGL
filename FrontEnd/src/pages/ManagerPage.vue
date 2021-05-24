@@ -68,12 +68,9 @@ export default {
     
     methods: {
         onSearchResource(searchCriteria) {
-            // const resourceId = Number(searchCriteria.simpleCriteria);
             const resourceName = searchCriteria.simpleCriteria;
             let criteria = {};
-            // if (Number.isInteger(resourceId)) {
-            //     criteria.id = resourceId;
-            // } else
+            
             if (typeof resourceName === 'string' && resourceName.trim() !== '') {
                 criteria.name = resourceName.trim();
             } else {
@@ -82,24 +79,25 @@ export default {
             }
             this.searchingResources = true;
 
-            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: criteria.toLowerCase()}]).
+            sendGet('https://orsaymediatheque.herokuapp.com/api/resource', [{name : 'name', value: criteria.name.toLowerCase()}]).
                 then( response => {
                     let result = [];
-                    if(response.succes){
+                    if(response.success){
+                        
                         result = response.docs.map(keptresource => {
                             return {
                                 title: keptresource.title,
                                 image: "",
                                 url: `/resource/${keptresource.id}`,
                                 lines: [ 
-                                    `${keptresource.author}, ${keptresource.releaseDate}`,
+                                    `${keptresource.author}, ${keptresource.releasedate}`,
                                     ``,
                                     `${keptresource.type}`,
                                 ]
                             };
                         });
                     }else{
-                        console.log(response.message);
+                        console.log("Error in getting list of ressources : ", response.message);
                     }
                     this.searchingResources = false;
                     this.resourceResults = result;
@@ -117,9 +115,6 @@ export default {
             // const customerId = Number(searchCriteria.simpleCriteria);
             const customerName = searchCriteria.simpleCriteria;
             let criteria = {};
-            // if (Number.isInteger(customerId)) {
-            //     criteria.id = customerId;
-            // } else 
             if (typeof customerName === 'string' && customerName.trim() !== '') {
                 criteria.name = customerName.trim();
             } else {
@@ -173,30 +168,28 @@ export default {
 
 
     created() {
-        const managerId = Number.parseInt(this.$route.params.managerId);
+        const managerId = this.$route.params.managerId;
         // Ici normalement, on appelle le service qui renvoie les données
         // de l'utilisateur en fonction de son id
         // Donnee dummy valorisées dans le "then", comme la partie 
         // qui définie les fonctionalités utilisables.
-        sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/users.json').
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/${managerId}`).
             then( response => {
-                // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                // QUE l'utilisateur concerné
-                const customer = response.find( user => user.id === managerId );
-
-                const userRequested = {
-                    id: customer.id,
-                    firstname: customer.firstname,
-                    lastName: customer.name,
-                    email: customer.id,
-                    age: customer.age,
-                    numberOfChildren: customer.childlist,
-                    balance: customer.balance,
-                    status: customer.statut,
-                };
-                this.dataError = false;
-                this.manager = userRequested;
-
+                if(response.success){
+                    // console.log("infos manager : ", response);
+                    const userRequested = {
+                        email: response.docs.id,
+                        firstName: response.docs.firstname,
+                        lastName: response.docs.name,
+                        age: response.docs.age,
+                        status: response.docs.statut,
+                    };
+                    this.manager = userRequested;
+                    this.dataError = false;
+                }else{
+                    console.log("Error in getting manager infos : ", response.message);
+                    this.dataError = true;
+                }
             }).
             catch( error => {
                 openModal(this, 'manager-error-modal', `Erreur lors de la récupération de vos données : ${error.message}`);

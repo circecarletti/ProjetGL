@@ -84,10 +84,6 @@
 </template>
 
 <script>
-// Upload d'image (photos/couvertures :
-// https://www.positronx.io/vue-js-express-single-multiple-files-and-images-upload/
-// https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#uploading_a_file
-// https://serversideup.net/uploading-files-vuejs-axios/
 
 import { openModal} from './Modal.vue';
 import { sendPost } from '../services/httpHelpers.js';

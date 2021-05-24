@@ -1,7 +1,7 @@
 <template>
     <div class="small-search-result-item-area">
         <div class="image-area">
-            <img :src="imagePath">
+            <!-- <img :src="imagePath"> -->
         </div>
         <div class="text-area">
             <div class="title">

@@ -35,7 +35,7 @@
  *          lastName: nom,
  *          email: email,
  *          age: l'age en années
- *          childrenAccountIds: tableau des identifians de comptes de mineurs ratachés au compte. 
+ *          childrenAccountIds: tableau des identifiants de comptes de mineurs ratachés au compte. 
  *                              Non spécifié pour un administrateur.
  *      }
  */
@@ -66,7 +66,7 @@ export default {
         },
         age() {
             if (this.user && typeof this.user.age === 'number') {
-                return this.user.age > 1 ? this.user.age + 'ans.' : this.user.age + 'an.';
+                return this.user.age > 1 ? this.user.age + 'ans' : this.user.age + 'an';
             } else {
                 return 'Inconnu';
             }
