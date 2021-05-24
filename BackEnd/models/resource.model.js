@@ -53,7 +53,7 @@ const resourceSchema = new mongoose.Schema(
         },
         picture: {
             type: String,
-            default: "./upoads/profil/random-user.png"
+            default: "./uploads/profil/random-user.png"
         },
         resume: {
             type: String,

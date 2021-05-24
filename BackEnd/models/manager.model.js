@@ -34,6 +34,12 @@ const managerSchema = new mongoose.Schema(
             minlength: 3,
             trim: true
         },
+        age: {
+            type: Number,
+            min: 18,
+            max: 100,
+            required: true
+        },
         statut: {
             type: String,
             default: 'manager'

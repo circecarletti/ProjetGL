@@ -36,7 +36,7 @@ router.put('/updateAge', adultMemberController.updateAge);
 router.put('/buyMembership', adultMemberController.buyMembership);
 
 //renew membershio // renouveller un abonnement renouvellement automatique pour les enfants egalement
-//router.put('/renewMembership', adultMemberController.renewMembership);
+router.put('/renewMembership', adultMemberController.renewMembership);
 
 //rent a resource
 router.put('/rentResource', adultMemberController.rentResource);
@@ -45,6 +45,6 @@ router.put('/rentResource', adultMemberController.rentResource);
 router.put('/returnResource', adultMemberController.returnResource);
 
 //route update password
-//router.put('/updatePassword', userController.updatePassword);
+router.put('/updatePassword', adultMemberController.updatePassword);
 
 module.exports = router;
