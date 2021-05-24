@@ -21,6 +21,9 @@ router.delete('/:id', managerController.deleteUser);
 //modifyBalance
 router.post('/modifyBalance', managerController.modifyBalance);
 
+//add member 
+router.post('/addMember', managerController.addMember);
+
 //route update name
 router.put('/updateName', managerController.updateName);
 
@@ -34,13 +37,13 @@ router.put('/updateAge', managerController.updateAge);
 router.put('/unlockMember', managerController.unlockMember);
 
 //rent a resource
-router.put('/rentResource', managerController.rentResource);
+router.put('/addResourceToMember', managerController.addResourceToMember);
 
 //createRessource
 router.post('/createResource', managerController.createResource);
 
 //return a resource 
-router.put('/returnResource', managerController.returnResource);
+router.put('/deleteResourceToMember', managerController.deleteResourceToMember);
 
 //delete Resource
 router.put('/deleteResource', managerController.deleteResource);

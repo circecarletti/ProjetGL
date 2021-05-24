@@ -74,7 +74,7 @@ const resourceSchema = new mongoose.Schema(
             required: true
         }
     }
-)
+);
 
 //plugin mongoose sequence 
 resourceSchema.plugin(AutoIncrement, {id: 'ressource_seq', inc_field: 'id'});
