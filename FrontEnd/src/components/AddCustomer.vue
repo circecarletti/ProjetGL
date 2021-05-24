@@ -174,14 +174,17 @@ export default {
 
                 sendPost('https://orsaymediatheque.herokuapp.com/api/users/register', newCustomer).
                     then( response => {
-                        console.log(response);
+                        if(response.success){
+                            openModal(this, 'add-customer-create-modal', `Création du nouvel adhérent effectuée.`);
+                        }else{
+                            console.log("Error in creating new customer : ", response.message);
+                        }
                         this.lastName = '';
                         this.firstName = '';
                         this.email = '';
                         this.age = '';
                         this.password = '';
                         this.balance = '';
-                        openModal(this, 'add-customer-create-modal', `Création du nouvel adhérent effectuée.`)
                     }).
                     catch( error => {
                         console.error(error);
