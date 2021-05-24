@@ -3,7 +3,7 @@ const ResourceModel = require('../models/resource.model');
 //get resources
 module.exports.getResources = async (req, res) => {
     //if no query send with get 
-    if (((req.query === {}) || (req.query.name === undefined ))) {
+    if (((req.query === {}) || (req.query.name === undefined ) || (req.query.name === '' ))) {
         return res.send({success: false, message: 'error resources'});
     }
     
