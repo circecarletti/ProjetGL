@@ -87,7 +87,6 @@ export default {
                         result = response.docs.map(keptresource => {
                             return {
                                 title: keptresource.title,
-                                image: "",
                                 url: `/resource/${keptresource.id}`,
                                 lines: [ 
                                     `${keptresource.author}, ${keptresource.releasedate}`,

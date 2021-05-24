@@ -27,10 +27,10 @@
                 <span>Email :</span>
             </div>
             <div class="input-cell">
-                <input type="text"
+                <input type="email"
                     ref="add-customer-email"
                     v-model="email"
-                    required :pattern="emailRegEx">
+                    required>
             </div>
         </div>
         <div class="line">
@@ -110,39 +110,54 @@ export default {
     },
 
     watch: {
+        
         firstName() {
             manageValidityMessage(
                 this.$refs['add-customer-first-name'],
                 `Le prénom est obligatoire et doit être au bon format.`);
         },
+
         lastName() {
             manageValidityMessage(
                 this.$refs['add-customer-last-name'],
                 `Le nom est obligatoire et doit être au bon format.`);
         },
+
         email() {
             manageValidityMessage(
                 this.$refs['add-customer-email'],
                 `L'email' est obligatoire et doit être au bon format.`);
         },
+
         age() {
             manageValidityMessage(
                 this.$refs['add-customer-age'],
                 `L'age est un entier strictement positif.`);
         },
+
         balance() {
             manageValidityMessage(
                 this.$refs['add-customer-balance'],
                 `Le montant doit être un nombre strictement positif, avec un maximum de deux décimales.`);
         },
+
+        password(newValue) {
+            if (newValue === '' || newValue !== this.password) {
+                this.$refs['add-customer-password'].setCustomValidity(`La confirmation du mot de passe est obligatoire et doit être égale à l'originel.`);
+            }else if (newValue.length < 8) {
+                this.$refs['add-customer-password'].setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
+            } else {
+                this.$refs['add-customer-password'].setCustomValidity(``);
+            }
+        },
     },
 
     computed: {
         balanceNotValid() {
-            return !positiveNumberDecimalCheck(Number(this.balance), 2);
+            return this.balance.trim() === '' || !positiveNumberDecimalCheck(Number(this.balance), 2);
         },
         passwordNotValid() {
-            return this.password === '';
+            return this.password.length < 8;
         },
         ageNotValid() {
             return this.age.trim() === '' || !this.$refs['add-customer-age'].validity.valid;
@@ -153,9 +168,12 @@ export default {
         firstNameNotValid() {
             return this.firstName.trim() === '' || !this.$refs['add-customer-first-name'].validity.valid;
         },
+        emailNotValid() {
+            return this.email.trim() === '' || !this.$refs['add-customer-email'].validity.valid;
+        },
         invalidData() {
             return this.balanceNotValid || this.passwordNotValid || this.ageNotValid ||
-                    this.lastNameNotValid || this.firstNameNotValid;
+                    this.lastNameNotValid || this.firstNameNotValid || this.emailNotValid;
         }
     },
 
@@ -178,6 +196,7 @@ export default {
                             openModal(this, 'add-customer-create-modal', `Création du nouvel adhérent effectuée.`);
                         }else{
                             console.log("Error in creating new customer : ", response.message);
+                            openModal(this, 'add-customer-create-modal', `Création du nouvel adhérent échoué, l'utilisateur existe déjà`);
                         }
                         this.lastName = '';
                         this.firstName = '';
@@ -232,6 +251,7 @@ export default {
     flex: auto;
 }
 
+.input-cell > input[type="email"],
 .input-cell > input[type="text"],
 .input-cell > input[type="password"] {
     text-align: center;

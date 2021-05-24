@@ -13,7 +13,6 @@
         <div class="result-area" v-else>
             <a-result-item v-for="resultItem in searchResult" :key="resultItem"
                 :title="resultItem.title"
-                :image="resultItem.image"
                 :url="resultItem.url"
                 :lines="resultItem.lines">
             </a-result-item>
@@ -33,7 +32,6 @@ import AResultItem from './SmallSearchResultItem.vue';
  *              le format suivant (correspond aux props des éléments résultat à afficher):
  *      {
  *          title: Titre de l'élémént (nom du client, titre de l'ouvrage, ...)
- *          image: path (à partir du répertoire public) où trouver l'image à afficher avec l'élément
  *          url: url pour débrancher quand on clique sur le titre (facultative)
  *          lines: tableau de string représentant des informations complémentaires à afficher. 
  *      }
@@ -62,7 +60,6 @@ export default {
                 return this.data.map( item => {
                     return {
                         title: item.title,
-                        image: item.image,
                         url: item.url,
                         lines: Array.isArray(item.lines) ? [...item.lines] : [],
                     }

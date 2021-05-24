@@ -2,7 +2,9 @@
     <div class="resource-area">
         <div class="picture-area">
             <h3>{{title}}</h3>
-            <!-- <img :src="'/' + url" class="image"> -->
+            <div class="picture">
+                <img src="/images/genericCover.jpg">
+            </div>
         </div>
         <div class="text-area">
             <h4>INFORMATIONS SUR LA RESSOURCE</h4>

@@ -1,7 +1,7 @@
 <template>
     <div class="small-search-result-item-area">
         <div class="image-area">
-            <!-- <img :src="imagePath"> -->
+            <img src="/images/genericCover.jpg">
         </div>
         <div class="text-area">
             <div class="title">
@@ -19,22 +19,14 @@
 /**
  * Usage :
  *  props:
- *      image : Chemin vers l'image à afficher, à partir du répertoir "public" (doit commencer par '/')
  *      title: Titre dans la zone d'information, portera le lien hypertexte pour le débranchement
  *      url: url pour débrancher (en chemin absolu)
  *      lines: tableau de string représentant les lignes d'informations supplémentaires sur l'élément. 
  *              Seules les trois première seront prises en compte.
  */
 export default {
-    props: ['image', 'title', 'url', 'lines'],
+    props: ['title', 'url', 'lines'],
     computed: {
-        imagePath() {
-            if (typeof this.image === 'string' && this.image.trim() !== '') {
-                return this.image.trim();
-            } else {
-                return '/images/questionMark.jpg';
-            }
-        },
         itemTitle() {
             if (typeof this.title === 'string' && this.title.trim() !== '') {
                 return this.title.trim();

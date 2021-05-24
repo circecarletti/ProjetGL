@@ -14,28 +14,21 @@
             </div>
             <div class="line">
                 <div class="label-cell">
-                    <span>Fichier :</span>
-                </div>
-                <div class="input-cell">
-                    <input type="file"
-                        ref="add-resource-file"
-                        accept="image/*"
-                        name="add-resource-file"
-                        @change="setFile"
-                        required>
-                </div>
-            </div>
-            <div class="line">
-                <div class="label-cell">
                     <span>Type :</span>
                 </div>
                 <div class="input-cell">
-                    <input type="radio" id="add-resource-type-livre"
-                        v-model="type" value="livre" name="type">
-                    <label for="add-resource-type-livre">Livre</label>
+                    <input type="radio" id="add-resource-type-book"
+                        v-model="type" value="book" name="type">
+                    <label for="add-resource-type-book">Livre</label>
                     <input type="radio" id="add-resource-type-dvd"
                         v-model="type" value="dvd" name="type">
                     <label for="add-resource-type-dvd">DVD</label>
+                    <input type="radio" id="add-resource-type-cd"
+                        v-model="type" value="cd" name="type">
+                    <label for="add-resource-type-cd">CD</label>
+                    <input type="radio" id="add-resource-type-videogames"
+                        v-model="type" value="videogames" name="type">
+                    <label for="add-resource-type-videogames">Jeux Videos</label>
                 </div>
             </div>
             <div class="line">
@@ -73,9 +66,22 @@
                     <input type="radio" id="add-resource-category-child"
                         v-model="category" value="child" name="category">
                     <label for="add-resource-category-child">enfant</label>
-                    <input type="radio" id="add-resource-category-tousPublic"
-                        v-model="category" value="tousPublic" name="category">
-                    <label for="add-resource-category-tousPublic">Tous</label>
+                    <input type="radio" id="add-resource-category-allpublic"
+                        v-model="category" value="allpublic" name="category">
+                    <label for="add-resource-category-allpublic">tous public</label>
+                </div>
+            </div>
+            <div class="line">
+                <div class="label-cell">
+                    <span>Prix :</span>
+                </div>
+                <div class="input-cell">
+                    <input type="text"
+                        ref="add-resource-price"
+                        v-model="price"
+                        :pattern="priceRegEx"
+                        required>
+                    € (pour 30 jours)
                 </div>
             </div>
             <div class="line large">
@@ -121,11 +127,12 @@
 
 <script>
 import { openModal} from './Modal.vue';
-import { sendPost, sendFile } from '../services/httpHelpers.js';
+import { sendPost } from '../services/httpHelpers.js';
 import { 
     regexStringFormulaForName, 
     regexStringFormulaForAge,
-    manageValidityMessage } from '../services/utils.js';
+    manageValidityMessage,
+    regexStringFormulaForBalance } from '../services/utils.js';
 
 export default {
     data() {
@@ -138,68 +145,125 @@ export default {
 			resume: '',
 			author: '',
 			releaseDate: '',
-			category: 'tousPublic',
+            price: '',
+			category: 'allpublic',
 			synopsis: '',
             nameRegEx: regexStringFormulaForName,
-            releaseDateRegEx: regexStringFormulaForAge
+            releaseDateRegEx: regexStringFormulaForAge,
+            priceRegEx : regexStringFormulaForBalance,
         }
     },
+
     watch: {
+
         title() {
-            manageValidityMessage(
-                this.$refs['add-resource-title'],
-                `Le titre de la ressouce doit être renseigné.`);
+            if(this.title.length < 3 || this.title.length > 30){
+                this.$refs['add-resource-title'].setCustomValidity("le titre doit faire entre 3 et 30 caractères");
+            }else{
+                manageValidityMessage(
+                    this.$refs['add-resource-title'],
+                    `Le titre de la ressource doit être renseigné.`);
+            }
         },
+
         author() {
-            manageValidityMessage(
-                this.$refs['add-resource-author'],
-                `Le nom de l'auteur doit être renseigné.`);
+            if(this.author.length < 3 || this.author.length > 30){
+                this.$refs['add-resource-author'].setCustomValidity("le nom de l'auteur doit faire entre 3 et 30 caractères");
+            }else{
+                    manageValidityMessage(
+                    this.$refs['add-resource-author'],
+                    `Le nom de l'auteur doit être renseigné.`);
+            }
         },
+
         releaseDate() {
-            manageValidityMessage(
-                this.$refs['add-resource-releaseDate'],
-                `L'année de la parution doit être renseigné.`);
+            if(Number(this.releaseDate < 1000)){
+                this.$refs['add-resource-releaseDate'].setCustomValidity("L'année renseigné ne doit pas précédée l'an 1000");
+            }else{
+                manageValidityMessage(
+                    this.$refs['add-resource-releaseDate'],
+                    `L'année de la parution doit être renseigné.`);
+            }
         },
+
+        price(){
+            if(Number(this.price > 100 || Number(this.price < 0))){
+                this.$refs['add-resource-price'].setCustomValidity("Le prix doit être compris entre 1 et 100€");
+            }else{
+                manageValidityMessage(
+                    this.$refs['add-resource-price'],
+                    `Le prix de l'emprunt doit être renseigné.`);
+            }
+            
+        },
+
         resume() {
             manageValidityMessage(
                 this.$refs['add-resource-resume'],
                 `Veuillez saisir le résumé.`);
         },
+
         synopsis() {
             manageValidityMessage(
                 this.$refs['add-resource-synopsis'],
                 `Veuillez saisir le synopsis.`);
         },
     },
+
     computed: {
+
         titleNotValid() {
             return this.title.trim() === '';
         },
-        typeNotValid() {
-            return this.type !== 'livre' && this.type !== 'dvd';
-        },
+
+
         fileNotValid() {
             return this.file === '';
         },
+
         categoryNotValid() {
             return this.category !== 'customer' && 
                     this.category !== 'child' && 
-                    this.category !== 'tousPublic';
+                    this.category !== 'allpublic';
         },
+
         authorNotValid() {
-            return this.author.trim() === '' && !this.$refs['add-resource-author'].validity.valid;
+            return this.author.trim() === '' || !this.$refs['add-resource-author'].validity.valid;
         },
+
         releaseDateNotValid() {
-            return this.releaseDate.trim() === '' && !this.$refs['add-resource-releaseDate'].validity.valid;
+            return this.releaseDate.trim() === ''
+                || Number(this.releaseDate.trim()) < 1000 
+                || !this.$refs['add-resource-releaseDate'].validity.valid;
         },
+
         resumeNotValid() {
             return this.resume.trim() === '';
         },
+
         synopsisNotValid() {
             return this.synopsis.trim() === '';
         },
+
+        priceNotValid(){
+            return  this.price.trim() === ''
+                || Number(this.price.trim()) < 0 
+                || Number(this.price.trim()) > 100 
+                || !this.$refs['add-resource-price'].validity.valid;
+        },
+
+        typeNotValid(){
+            return this.type !== 'dvd'
+                    && this.type !== 'cd'
+                    && this.type !== 'book'
+                    && this.type !== 'videogames';
+        },
+
         invalidData() {
-            return this.titleNotValid || this.typeNotValid || this.fileNotValid ||
+            console.log("resultat des test de validité : ", this.titleNotValid, this.typeNotValid, this.priceNotValid,
+                    this.categoryNotValid, this.authorNotValid, this.releaseDateNotValid,
+                    this.resumeNotValid, this.synopsisNotValid);
+            return this.titleNotValid || this.typeNotValid || this.priceNotValid ||
                     this.categoryNotValid || this.authorNotValid || this.releaseDateNotValid ||
                     this.resumeNotValid || this.synopsisNotValid;
         }
@@ -208,43 +272,33 @@ export default {
         onSubmit() {
             if (!this.invalidData) {
 
-                // Première chose réaliser l'upload du fichier de l'image
-                const formData = new FormData();
-                formData.append('type', 'resource');
-                formData.append('image', this.file);
+                const newResource = {
+                    title: this.title,
+                    category: this.category,
+                    author: this.author, 
+                    releasedate: this.releaseDate,
+                    type: this.type,
+                    price: this.price,
+                    resume: this.resume,
+                    synopsis: this.synopsis
+                };
 
-                sendFile('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/newResource.json', formData). 
+                sendPost('https://orsaymediatheque.herokuapp.com/api/user/manager/createResource', newResource). 
                     then( response => {
-                        // La réponse contient normalement le path de l'image
-                        console.log('retour upload', response);
-                        const newResource = {
-                            title: this.title,
-                            url: '????', // ici mettre le path renvoyé par la réponse
-                            new: true,
-                            type: this.type,
-                            resume: this.resume,
-                            author: this.author,
-                            releaseDate: this.releaseDate,
-                            category: this.category,
-                            synopsis: this.synopsis,
-                        };
-                        // Maintenant on appelle la création de la ressource elle même
-                        return sendPost(
-                            'https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/newResource.json', 
-                            newResource);
-                    }).
-                    then( response => {
-                        console.log(response);
-                        this.title = '';
-                        this.url = '';
-                        this.type = 'dvd';
-                        this.resume = '';
-                        this.author = '';
-                        this.releaseDate = '';
-                        this.category = 'tousPublic';
-                        this.synopsis = '';
-                        this.file = '';
-                        openModal(this, 'add-resource-success-modal', `ajout de la nouvelle ressource effectuée.`)
+                        if(response.success){
+                            this.title = '';
+                            this.url = '';
+                            this.type = 'dvd';
+                            this.resume = '';
+                            this.author = '';
+                            this.releaseDate = '';
+                            this.category = 'allpublic';
+                            this.synopsis = '';
+                            this.file = '';
+                            openModal(this, 'add-resource-success-modal', `ajout de la nouvelle ressource effectuée.`);
+                        }else{
+                            console.log("Error in adding a new resource : ", response.message);
+                        }
                     }).
                     catch( error => {
                         console.error(error);

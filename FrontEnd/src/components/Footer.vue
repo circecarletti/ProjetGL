@@ -3,7 +3,6 @@
         <div class="left-area">
             <div class="cell left">
                 <div class="image">
-                    <!--i class="far fa-clock" style="font-size:1rem;color:red;"></i-->
                     <i class="far fa-clock fa-2x"></i>
                 </div>
                 <div class="text">
