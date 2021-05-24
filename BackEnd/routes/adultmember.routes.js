@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const adultMemberController = require('../controllers/adultmember.controller');
 
-
 //routes for adultmember is https://orsaymediatheque.herokuapp.com/api/user/adultmember
 
 

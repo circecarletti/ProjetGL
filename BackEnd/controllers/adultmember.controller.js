@@ -402,7 +402,7 @@ module.exports.rentResource = async (req, res) => {
         if (resource.loan)
             return res.json({success:false, message:'resource is already borrowed'});
 
-        const user = await MemberModel.findOne({ id : email}).exec();
+        const user = await MemberModel.findOne({ id : email});
 
         if(user.balance < resource.price ) {
             return res.json({success:false, message:'insufficient balance'});

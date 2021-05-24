@@ -108,8 +108,11 @@ var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, functio
 /*
 //add penalties to delayed loan member every day at 00h10
 var delayPenalties = schedule.scheduleJob({hour: 00, minute: 10}, function(){
-    walk.on('dir', function (dir, stat) {
-       uploadDir.push(dir);
+    ResourceModel.updateMany({loan: true}, {$inc: {loanday: Number(-1)}}, {upsert:true} ,
+    function (err) {
+        if (err){
+            console.log(err)
+        }
     });
 });*/
 

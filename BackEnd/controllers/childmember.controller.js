@@ -1,6 +1,10 @@
 const MemberModel = require('../models/member.model');
 const ChildMemberModel = require('../models/childmember.model');
-
+const LoanModel = require('../models/loan.model');
+const ResourceModel = require('../models/resource.model');
+const ObjectId = require('mongoose').Types.ObjectId;
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose')
 
 //informations user 
 module.exports.userInfo = async (req, res) => {
@@ -134,7 +138,7 @@ module.exports.updateAge = async (req, res) => {
     }
 };
 
-//rent a resource //louer une resource
+//rent a resource //louer une resource ////////////////////
 module.exports.rentResource = async (req, res) => {
     const email = req.body.id;
     const idResource = req.body.idresource;
@@ -153,9 +157,9 @@ module.exports.rentResource = async (req, res) => {
             return res.json({success:false, message:'resource is already borrowed'});
 
         if (resource.category === 'adult')
-            return res.json({success:false, message:'resource for adult cannot be borrowed by a child'});    
+            return res.json({success:false, message:'resource for adult cannot be borrowed by a child'});   
 
-        const user = await MemberModel.findOne({ id : email}).exec();
+        const user = await MemberModel.findOne({ id : email});
 
         if(user.balance < resource.price ) {
             return res.json({success:false, message:'insufficient balance'});
@@ -201,6 +205,7 @@ module.exports.rentResource = async (req, res) => {
         return res.json({success: false, message: "error resource not borrowed", err});
    }
 };
+
 
 //return a resource //retourner  une resource
 module.exports.returnResource = async (req, res) => {
