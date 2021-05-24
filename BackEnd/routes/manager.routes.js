@@ -34,6 +34,6 @@ router.post('/createResource', managerController.createResource);
 router.put('/returnResource', managerController.returnResource);
 
 //route update password
-//router.put('/updatePassword', userController.updatePassword);
+router.put('/updatePassword', managerController.updatePassword);
 
 module.exports = router;
