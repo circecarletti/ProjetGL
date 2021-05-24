@@ -1,7 +1,10 @@
 const express = require('express');
 const cookieParser = require('cookie-parser'); //library for using cookie 
+const schedule = require('node-schedule'); //require node shedule for automatic function launch
 const userRoutes = require('./routes/user.routes.js');  // a suppr
 const resourceRoutes = require('./routes/resource.routes.js'); 
+
+//const ResourceModel = require('./models/resource.model');
 
 const adultMemberRoutes = require('./routes/adultmember.routes.js'); //routes adultmember
 const childMemberRoutes = require('./routes/childmember.routes.js'); //routes childmember
@@ -86,6 +89,24 @@ app.use('/api/resource', resourceRoutes);
 
 //routes creating a manager
 app.use('/api/programmer', programmerRoutes);
+
+
+var test = schedule.scheduleJob({hour: 19, minute: 52}, function(){
+    console.log('il est 19h52');
+    console.log('il est 19h52');
+});
+/*
+//decrement days to loan member every day at 00h00
+var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, function(){
+   // await ResourceModel.find
+});
+
+//add penalties to delayed loan member every day at 00h10
+var delayPenalties = schedule.scheduleJob({hour: 00, minute: 10}, function(){
+    walk.on('dir', function (dir, stat) {
+       uploadDir.push(dir);
+    });
+});*/
 
 //server
 app.listen(process.env.PORT, () => {

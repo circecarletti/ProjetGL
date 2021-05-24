@@ -27,8 +27,93 @@ module.exports.userInfo = async (req, res) => {
     }
 };
 
+
+//add Member
+//fonction ajouter adherent 
+module.exports.addMember = async (req, res) => {
+    const {id, password, name, firstname, age, balance} = req.body
+
+    try {
+        //verifiy id not in manager collection
+        if (await ManagerModel.exists({ id: id}))
+            return res.json({success: false, message: 'ID existed'}); 
+        //creating member 
+        const member = await MemberModel.create({id:id, password: password, name: name, firstname: firstname, balance: balance, statut: 'adultmember'});
+        //creating adultmember,  member included in adultmember
+        const user = await AdultMemberModel.create({ id: id, age: age, member: member}); 
+
+        const loan = await LoanModel.create({idadherent: member._id});
+        
+        await MemberModel.findOneAndUpdate({id:id}, {loan: loan._id},{new:true, upsert: true}, function(err, docs){
+            if (err){
+                console.log(err);
+            }else {
+                console.log("updated user docs ", docs);
+            }
+        });
+
+        console.log('Member successfully created!'); 
+        return res.json({ success: true, user: user.id }); 
+    }
+    catch(err) {
+        console.log(err)
+        if(err.code == 11000){
+           return res.json({ success: false, message: 'ID existed' , err});
+        }else if(err.errors && err.errors.name){
+            return res.json({ success: false, message: 'error with name' , err});
+        }else if(err.errors && err.errors.firstname){
+            return res.json({ success: false, message: 'error with fistName' , err});
+        }else if(err.errors && err.errors.age){
+            return res.json({ success: false, message: 'error with age' , err});
+        }else if(err.errors && err.errors.password){
+            return res.json({ success: false, message: 'error with password' , err});
+        }else {
+            return res.json({ success: false, message:'erreur signup', err });
+        }
+    }
+}
+
+//get infos users
+module.exports.getUsersInfo = async (req, res) => {
+    console.log('je suis la ')
+    //if no query send with get 
+    if (((req.query === {}) || (req.query.name === undefined ) || (req.query.name === '' ))) {
+        return res.send({success: false, message: 'error params name users'});
+    }
+
+    const name = req.query.name;
+    console.log(name)
+
+    try {
+        //search in author or title
+        const query = {
+            $or: [ 
+                { "name" : { $regex: '.*' + name + '.*' }}, 
+                { "firstname" : { $regex: '.*' + name + '.*' }},
+                { "id" : { $regex: '.*' + name + '.*' }}
+            ]
+        };
+
+        await MemberModel.find(query,'-_id -password -__v', function(err, docs) {
+            if(err){
+                return res.send({success: false, message : 'error get infos users', err});
+            }
+            if (docs.length){
+                return res.send({success: true,message:'success get infos users' , docs});
+            } else {
+                return res.send({success: false, message : 'users not found', err});
+            }
+        });
+    }
+    catch(err){
+        return res.send({ success: false, message: "error get infos users"}); 
+    }
+};
+
+
+
 //informations user 
-module.exports.getUserInfo = async (req, res) => {
+module.exports.getUserInfoById = async (req, res) => {
     const email = req.params.id;
 
     //check if email is in the database
@@ -292,7 +377,8 @@ module.exports.createResource = async (req, res) => {
         type: req.body.type,
         price: req.body.price,
         resume: (req.body.resume) ? req.body.resume : '',
-        synopsis: (req.body.synopsis) ? req.body.synopsis : ''
+        synopsis: (req.body.synopsis) ? req.body.synopsis : '',
+        picture:  (req.body.picture) ? req.body.picture : "covers/random-cover1.jpg"
     });
 
     try {
@@ -556,50 +642,3 @@ module.exports.deleteResourceToMember = async (req, res) => {
         return res.json({success: false, message: "error returning the resource", err});
    }
 };
-
-
-
-//add Member
-//fonction ajouter adherent 
-module.exports.addMember = async (req, res) => {
-    const {id, password, name, firstname, age, balance} = req.body
-
-    try {
-        //verifiy id not in manager collection
-        if (await ManagerModel.exists({ id: id}))
-            return res.json({success: false, message: 'ID existed'}); 
-        //creating member 
-        const member = await MemberModel.create({id:id, password: password, name: name, firstname: firstname, balance: balance, statut: 'adultmember'});
-        //creating adultmember,  member included in adultmember
-        const user = await AdultMemberModel.create({ id: id, age: age, member: member}); 
-
-        const loan = await LoanModel.create({idadherent: member._id});
-        
-        await MemberModel.findOneAndUpdate({id:id}, {loan: loan._id},{new:true, upsert: true}, function(err, docs){
-            if (err){
-                console.log(err);
-            }else {
-                console.log("updated user docs ", docs);
-            }
-        });
-
-        console.log('Member successfully created!'); 
-        return res.json({ success: true, user: user.id }); 
-    }
-    catch(err) {
-        console.log(err)
-        if(err.code == 11000){
-           return res.json({ success: false, message: 'ID existed' , err});
-        }else if(err.errors && err.errors.name){
-            return res.json({ success: false, message: 'error with name' , err});
-        }else if(err.errors && err.errors.firstname){
-            return res.json({ success: false, message: 'error with fistName' , err});
-        }else if(err.errors && err.errors.age){
-            return res.json({ success: false, message: 'error with age' , err});
-        }else if(err.errors && err.errors.password){
-            return res.json({ success: false, message: 'error with password' , err});
-        }else {
-            return res.json({ success: false, message:'erreur signup', err });
-        }
-    }
-}

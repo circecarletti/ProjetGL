@@ -1,6 +1,7 @@
 const ManagerModel = require('../models/manager.model');
 const MemberModel = require('../models/member.model');
 
+
 //signup manager
 module.exports.signUpManager = async (req, res) => {
     //console.log(req.body);
@@ -25,3 +26,4 @@ module.exports.signUpManager = async (req, res) => {
        }
     }
 }
+

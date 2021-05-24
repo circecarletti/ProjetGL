@@ -73,7 +73,7 @@ const memberSchema = new mongoose.Schema(
         },
         picture: {
             type: String,
-            default: "./upoads/profil/random-user.png"
+            default: "images/icon.jpg"
         }
     }
 );

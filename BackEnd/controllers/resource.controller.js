@@ -158,3 +158,29 @@ module.exports.SearchByFilter = async (req, res) => {
         return res.json({ success: false, message: "search by filter resources"}); 
     }
 };
+
+
+//get info Resource Available
+module.exports.getResourceAvailable = async (req, res) => {
+    const id = req.params.id;
+    //if no query send with get 
+    if (!(await ResourceModel.exists({id: id})))
+        return res.json({success: false, message : 'error id resource'});
+
+    try {
+        console.log(id)
+        await ResourceModel.findOne({id: id},'loan -_id -__v', function(err, docs) {
+            if(err){
+                return res.json({success: false, message : 'error get resource', err});
+            }
+            if (docs.loan){
+                return res.json({success: true, available: true, message:'resource is available'});
+            } else {
+                return res.json({success: true, available: false, message : 'resource is not available', err});
+            }
+        });
+    }
+    catch(err){
+        return res.json({ success: false, message: "error get resource by id"}); 
+    }
+};

@@ -7,6 +7,8 @@ router.get('/', resourceController.getResources);
 
 router.get('/searchFilter', resourceController.SearchByFilter);
 
-router.get('/:id', resourceController.getResourceByID)
+router.get('/:id', resourceController.getResourceByID);
+
+router.get('/getAvailable/:id', resourceController.getResourceAvailable);
 
 module.exports = router;

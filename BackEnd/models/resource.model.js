@@ -15,7 +15,7 @@ const resourceSchema = new mongoose.Schema(
         title: {
             type: String,
             required: true,
-            maxlength: 30, 
+            maxlength: 100, 
             minlength: 3,
             trim: true
         },
@@ -27,7 +27,7 @@ const resourceSchema = new mongoose.Schema(
         author: {
             type: String,
             required: true,
-            maxlength: 30, 
+            maxlength: 100, 
             minlength: 3,
             trim: true
         },
@@ -53,7 +53,7 @@ const resourceSchema = new mongoose.Schema(
         },
         picture: {
             type: String,
-            default: "./uploads/profil/random-user.png"
+            default: "covers/random-cover1.jpg"
         },
         resume: {
             type: String,

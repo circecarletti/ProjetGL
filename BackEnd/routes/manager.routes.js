@@ -6,8 +6,11 @@ const managerController = require('../controllers/manager.controller');
 //get managger info 
 router.get('/:id', managerController.userInfo);
 
+//getUsersInfo
+router.get('/getUsersInfo/info', managerController.getUsersInfo);
+
 //get users info
-router.get('/getUserInfo/:id', managerController.getUserInfo);
+router.get('/getUserInfoById/:id', managerController.getUserInfoById);
 
 //get user loan info
 router.get('/getUserLoanInfo/:id', managerController.getUserLoanInfo);
