@@ -127,7 +127,7 @@
 
 <script>
 import { openModal} from './Modal.vue';
-import { sendPost } from '../services/httpHelpers.js';
+import { sendGet, sendPost } from '../services/httpHelpers.js';
 import { 
     regexStringFormulaForName, 
     regexStringFormulaForAge,
@@ -283,8 +283,9 @@ export default {
                     synopsis: this.synopsis
                 };
 
-                sendPost('https://orsaymediatheque.herokuapp.com/api/user/manager/createResource', newResource). 
-                    then( response => {
+                sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                    return sendPost('https://orsaymediatheque.herokuapp.com/api/user/manager/createResource', newResource);
+                    }).then( response => {
                         if(response.success){
                             this.title = '';
                             this.url = '';

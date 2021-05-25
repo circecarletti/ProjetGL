@@ -29,15 +29,16 @@
 
 <script>
 import { openModal } from './Modal.vue';
-import { sendPut, sendDelete } from '../services/httpHelpers.js';
+import { sendPut, sendDelete, sendGet } from '../services/httpHelpers.js';
 
 export default {
     methods: {
         onRelease() {
             const releasePayload = { id: this.$route.params.customerId };
 
-            sendPut(`https://orsaymediatheque.herokuapp.com/api/user/manager/unlockMember`, releasePayload).
-                then( response => {
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                return sendPut(`https://orsaymediatheque.herokuapp.com/api/user/manager/unlockMember`, releasePayload);
+            }).then( response => {
                     console.log(response);
                     if(response.success){
                         openModal(this, 'update-delete-update-modal', `L'adhérent a bien été débloqué.`);
@@ -60,8 +61,9 @@ export default {
         deleteCustomer() {
             const custId = this.$route.params.customerId
 
-            sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/${custId}`).
-                then( response => {
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                return sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/${custId}`);
+            }).then( response => {
                     console.log("response of deleting : ", response);
                     if(response.success){
                         openModal(this, 'update-delete-update-modal', `L'adhérent a bien été supprimé.`);

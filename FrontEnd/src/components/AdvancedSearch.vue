@@ -18,7 +18,7 @@
         </div>
         <div class="line">
             <div class="cell">
-                <checkboxes-list id="cathegorie-criteria" label="Catégorie" :data="initCbCathegory" @values-set="onCategoriesSet"></checkboxes-list>
+                <checkboxes-list id="cathegorie-criteria" label="Catégories" :data="initCbCathegory" @values-set="onCategoriesSet"></checkboxes-list>
             </div>
             <div class="cell">
                 <checkboxes-list id="type-criteria" label="Types" :data="initCbTypes" @values-set="onTypesSet"></checkboxes-list>
@@ -74,18 +74,18 @@ export default {
         return {
             initCbCathegory: [
                 {
-                    label: 'customer',
-                    value: 'customer',
+                    label: 'adulte',
+                    value: 'adult',
                     checked: false
                 },
                 {
-                    label: 'child',
+                    label: 'enfant',
                     value: 'child',
                     checked: false
                 },
                 {
-                    label: 'Tous publics',
-                    value: 'tousPublic',
+                    label: 'tous publics',
+                    value: 'allpublic',
                     checked: false
                 },
             ],
@@ -102,19 +102,19 @@ export default {
                 },
                 {
                     label: 'Livres',
-                    value: 'livre',
+                    value: 'book',
                     checked: false
                 },
                 {
                     label: 'Jeux video',
-                    value: 'jeux',
+                    value: 'videogames',
                     checked: false
                 }
             ],
             selectedCategories: [],
             selectedTypes: [],
             available: false,
-            releaseDate: undefined,
+            releaseDate: '',
             author: '',
             title: ''
         }

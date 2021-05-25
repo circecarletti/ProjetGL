@@ -190,8 +190,9 @@ export default {
                     idChild: this.childrenAccountIdToFeed,
                     balance: Number(this.amountToFeed),
                 };
-                sendPut('https://orsaymediatheque.herokuapp.com/api/user/adultmember/fundChildAccount', updateChildBalance).
-                    then( response => {
+                sendGet(`https://orsaymediatheque.herokuapp.com/jwtidAdult`).then(()=>{
+                    return sendPut('https://orsaymediatheque.herokuapp.com/api/user/adultmember/fundChildAccount', updateChildBalance);
+                }).then( response => {
                         if(response.success){
                             openModal(this, 'theModalUpdated', `Le solde a bien été mis à jour.`);
                             this.refreshList();
@@ -224,8 +225,9 @@ export default {
                     emprunt: [],
                 };
 
-                sendPost('https://orsaymediatheque.herokuapp.com/api/user/adultmember/registerChild', newChildAccount).
-                    then( response => {
+                sendGet(`https://orsaymediatheque.herokuapp.com/jwtidAdult`).then(()=>{
+                    return sendPost('https://orsaymediatheque.herokuapp.com/api/user/adultmember/registerChild', newChildAccount);
+                }).then( response => {
                         console.log(response);
                         if(response.success){
                             openModal(this, 'theModalUpdated', `Le compte pour mineur a bien été créé.`);
@@ -249,8 +251,9 @@ export default {
             // La valorisation du tableau des comptes se fait dans le "then"
             // de la promise
             this.waiting = true;
-            sendGet(`https://orsaymediatheque.herokuapp.com/api/user/adultmember/childInfo/${this.customerId}`).
-                then( response => {
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidAdult`).then(()=>{
+                    return sendGet(`https://orsaymediatheque.herokuapp.com/api/user/adultmember/childInfo/${this.customerId}`);
+            }).then( response => {
                     console.log("list of children response : ", response);
                     if(response.success){
                         this.accountsList = response.docs.childlist.map(child=>{

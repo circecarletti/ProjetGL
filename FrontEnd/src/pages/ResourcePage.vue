@@ -126,6 +126,7 @@ export default {
 
                 let url = '';
                 if(this.$store.getters['isUserChild']){
+                    sendGet(`https://orsaymediatheque.herokuapp.com/jwtidChild`);
                     url = 'https://orsaymediatheque.herokuapp.com/api/user/childmember/rentResource';
                 }else{
                     sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
@@ -151,7 +152,9 @@ export default {
         },
 
         deleteItem() {
-            sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/deleteResource/${this.id}`).then(response => {
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                return sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/deleteResource/${this.id}`);
+            }).then(response => {
                     if(response.success){
                         openModal(this, 'resource-success-modal', 'La ressource a bien été supprimé.');
                             this.dataError = false;

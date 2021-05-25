@@ -85,7 +85,7 @@
 
 <script>
 import { openModal} from './Modal.vue';
-import { sendPut } from '../services/httpHelpers.js';
+import { sendPut, sendGet } from '../services/httpHelpers.js';
 import { 
     regexStringFormulaForName, 
     regexStringFormulaForBalance,
@@ -167,6 +167,8 @@ export default {
             };
             let toDo = true;
             let url = '';
+
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`);
 
             switch(field) {
                 case 'name':

@@ -52,11 +52,13 @@ export default {
         const isAdult = TheStore.getters['isUserCustomer'];
         const isManager = TheStore.getters['isUserManager'];
         if(isChild){
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidChild`);
             url = `https://orsaymediatheque.herokuapp.com/api/user/childmember/${custId}`;
         }else if (isAdult){
             sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
             url = `https://orsaymediatheque.herokuapp.com/api/user/adultmember/${custId}`;
         }else if (isManager){
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`);
             url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${custId}`
         }
         sendGet(url).

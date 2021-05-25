@@ -71,8 +71,10 @@ export default {
         onRemove(borrowedId) {
             const customerId = this.$route.params.customerId;
             const removePayload = {id : customerId, idresource : borrowedId};
-            sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/removeResourceToMember', removePayload).
-                then( response => {
+            
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                return sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/removeResourceToMember', removePayload);
+                }).then( response => {
                         console.log(response);
                     if(response.success){
                         console.log(response);
@@ -95,8 +97,9 @@ export default {
                     idresource: Number(this.itemIdToBorrow)
                 };
                 // Si tout est ok, on n'a plus qu'à ajouter l'objet de la liste
-                sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/addResourceToMember', borrowPayload).
-                    then( response => {
+                sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                    return sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/addResourceToMember', borrowPayload);
+                    }).then( response => {
                         console.log(response);
                         if(response.success){
                             this.borrowedItems.push({
@@ -124,8 +127,7 @@ export default {
         this.waiting = true;
         const userId = this.$route.params.customerId;
         
-        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${userId}`).
-            then( response => {
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${userId}`).then( response => {
                 // console.log("response to getting customer info : ", response);
                 if(response.success){
                     this.customerStatus = (response.docs.member.statut).trim();
@@ -133,11 +135,13 @@ export default {
                     
                     let url = '';
                     if(this.isManager){
+                        sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`);
                         url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserLoanInfo/${userId}`;
                     }else if(this.customerStatus === 'adultmember'){
                         sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
                         url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`;
                     }else{
+                        sendGet(`https://orsaymediatheque.herokuapp.com/jwtidChild`);
                         url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`;
                     }
                     return  sendGet(url);

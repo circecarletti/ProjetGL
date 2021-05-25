@@ -120,23 +120,35 @@ export default {
                 sendedCriterias.push({name: "author", value: criteriaObject.author.toLowerCase()});
             }
 
-            if(criteriaObject.releasedDate){
-                sendedCriterias.push({name: "releasedDate", value: criteriaObject.releasedDate});
+            if(criteriaObject.releaseDate){
+                sendedCriterias.push({name: "releasedate", value: criteriaObject.releaseDate});
             }
             
             if(criteriaObject.categories){
-                sendedCriterias.push({name: "category", value: criteriaObject.categories.map(cat => cat.toLowerCase())});
+                // sendedCriterias.push({name: "category", value: criteriaObject.categories.map(cat => cat.toLowerCase())});
+                criteriaObject.categories.map(type => type.toLowerCase());
+                criteriaObject.categories.map(cat => {
+                    if(cat === 'child'){
+                        sendedCriterias.push({name: "category", value: 'category_child'});
+                    }else if (cat === 'adult'){
+                        sendedCriterias.push({name: "category", value: 'category_adult'});
+                    }else if (cat === 'allpublic'){
+                        sendedCriterias.push({name: "category", value: 'category_allpublic'});
+                    }
+                });
             }
             
             if(criteriaObject.types){
                 criteriaObject.types.map(type => type.toLowerCase());
                 criteriaObject.types.map(type => {
-                    if(type === 'child'){
-                        sendedCriterias.push({name: "type", value: "type-child"});
-                    }else if (type === 'customer'){
-                        sendedCriterias.push({name: "type", value: "type-customer"});
-                    }else{
-                        sendedCriterias.push({name: "type", value: "type-everyone"});
+                    if(type === 'cd'){
+                        sendedCriterias.push({name: "type", value: "type_cd"});
+                    }else if (type === 'dvd'){
+                        sendedCriterias.push({name: "type", value: "type_dvd"});
+                    }else if (type === 'book'){
+                        sendedCriterias.push({name: "type", value: "type_livre"});
+                    }else if (type === 'videogames'){
+                        sendedCriterias.push({name: "type", value: "type_videogames"});
                     }
                 });
             }
@@ -148,7 +160,7 @@ export default {
                     if(response.success){
                         this.result = response.docs;
                     }else{
-                        console.log(response.message)
+                        console.log("Error in getting resource by filter : ", response.message);
                     }
                     this.dataError = false;
                     this.searching = false;

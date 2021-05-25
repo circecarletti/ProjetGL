@@ -127,8 +127,9 @@ export default {
             this.searchingCustomers = true;
             // Ici, on appelle le service qui renvoie les données
             // de la recherche des adhérents
-            sendGet('https://orsaymediatheque.herokuapp.com/api/user/manager/getUsersInfo/info', [{name: 'name', value : searchCriteria.simpleCriteria}]).
-                then( response => {
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+                return sendGet('https://orsaymediatheque.herokuapp.com/api/user/manager/getUsersInfo/info', [{name: 'name', value : searchCriteria.simpleCriteria}]);
+            }).then( response => {
                     if(response.success){
                         // console.log("users list : ", response.docs);
                         const customersPres = response.docs.map(cust =>{
@@ -163,8 +164,9 @@ export default {
         console.log("creation page du manager : ", managerId);
         // Ici normalement, on appelle le service qui renvoie les données
         // de l'utilisateur en fonction de son id
-        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/${managerId}`).
-            then( response => {
+        sendGet(`https://orsaymediatheque.herokuapp.com/jwtidManager`).then(()=>{
+            return sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/${managerId}`);
+        }).then( response => {
                 if(response.success){
                     console.log("infos manager : ", response);
                     const userRequested = {
