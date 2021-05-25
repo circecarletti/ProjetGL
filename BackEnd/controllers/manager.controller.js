@@ -363,7 +363,8 @@ module.exports.unlockMember = async (req, res) => {
                 {id: email}, 
                 {
                     $set: {
-                        block: false
+                        block: false, 
+                        nbfailconnexion: Number(0)
                     }
                 },
                 { new: true, upsert: true, setDefaultsOnInsert: true},

@@ -1,3 +1,5 @@
+//https://orsaymediatheque.herokuapp.com/
+
 const express = require('express');
 const cookieParser = require('cookie-parser'); //library for using cookie 
 const schedule = require('node-schedule'); //require node shedule for automatic function launch
@@ -56,20 +58,7 @@ app.get('/jwtidAdult', requireAuthAdult);
 app.get('/jwtidChild', requireAuthChild);
 
 //require authentification for manager
-app.get('/jwtidManager', requireAuthManager, (req, res) => {
-    res.send(res.locals.user.id);
-});
-
-//middleware jwt to verify auth user 
-//launch middleware auth adult for all routes of adult member
-app.get('/api/user/adultmember', checkAdultMember);
-
-//launch middleware auth child for all routes of child member
-app.get('/api/user/childmember', checkChildMember);
-
-//launch middleware auth child for all routes of manager
-app.get('/api/user/manager', checkManager);
-
+app.get('/jwtidManager', requireAuthManager);
 
 //routes
 //routes user

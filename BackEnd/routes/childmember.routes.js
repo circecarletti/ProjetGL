@@ -3,7 +3,6 @@ const childMemberController = require('../controllers/childmember.controller');
 
 //routes for childmember is https://orsaymediatheque.herokuapp.com/api/user/childmember
 
-
 // http://localhost:5000/api/user/childmember  (local)
 
 

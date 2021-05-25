@@ -3,7 +3,6 @@ const authController = require('../controllers/auth.controller');
 
 //routes for users is https://orsaymediatheque.herokuapp.com/api/users
 
-
 //auth 
 //route signup adultmember
 router.post('/register', authController.signUp);

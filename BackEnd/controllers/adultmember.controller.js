@@ -375,5 +375,3 @@ module.exports.renewMembership = async (req, res) => {
         return res.json({success: false, message: "error membership not purchased", err});
     }
 };
-
-
