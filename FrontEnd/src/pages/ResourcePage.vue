@@ -3,7 +3,7 @@
         <div class="picture-area">
             <h3>{{title}}</h3>
             <div class="picture">
-                <img :src="'/' + urlImage">
+                <img class="image" :src="'/' + urlImage">
             </div>
         </div>
         <div class="text-area">
@@ -222,7 +222,7 @@ export default {
 }
 
 .image {
-    width: 80%;
+    width: 60%;
     height: auto;
     max-height: 85%
 }

@@ -37,7 +37,9 @@ export default {
         isCustomer() {
             return this.$store.getters['isUserCustomer'];
         },
-
+        isManager(){
+            return this.$store.getters['isUserManager'];
+        },
         isChild(){
             return this.$store.getters['isUserChild'];
         }
@@ -47,18 +49,22 @@ export default {
         const custId = this.$route.params.customerId;
         let url;
         const isChild = TheStore.getters['isUserChild'];
+        const isAdult = TheStore.getters['isUserCustomer'];
+        const isManager = TheStore.getters['isUserManager'];
         if(isChild){
             url = `https://orsaymediatheque.herokuapp.com/api/user/childmember/${custId}`;
-        }else{
+        }else if (isAdult){
             url = `https://orsaymediatheque.herokuapp.com/api/user/adultmember/${custId}`;
+        }else if (isManager){
+            url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${custId}`
         }
         
         sendGet(url).
             then( response => {
                 if(response.success){
-                    console.log("response customerPage : ", response);
+                    // console.log("response customerPage : ", response);
                     let userRequested = {};
-                    if(isChild){
+                    if(response.docs.member.statut === 'childmember'){
                         userRequested = {
                             firstName : response.docs.member.firstname,
                             lastName : response.docs.member.name,

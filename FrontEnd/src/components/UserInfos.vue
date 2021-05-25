@@ -72,7 +72,7 @@ export default {
             }
         },
         numberOfChildren() {
-            if (this.user && typeof this.user.numberOfChildren === 'number') {
+            if (this.user && this.user.numberOfChildren && typeof this.user.numberOfChildren === 'number') {
                 return `${this.user.numberOfChildren}`;
             } else {
                 return -1;

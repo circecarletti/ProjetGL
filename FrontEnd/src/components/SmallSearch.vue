@@ -13,6 +13,7 @@
         <div class="result-area" v-else>
             <a-result-item v-for="resultItem in searchResult" :key="resultItem"
                 :title="resultItem.title"
+                :image="resultItem.image"
                 :url="resultItem.url"
                 :lines="resultItem.lines">
             </a-result-item>
@@ -60,6 +61,7 @@ export default {
                 return this.data.map( item => {
                     return {
                         title: item.title,
+                        image: item.image,
                         url: item.url,
                         lines: Array.isArray(item.lines) ? [...item.lines] : [],
                     }

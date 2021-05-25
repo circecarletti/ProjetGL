@@ -88,6 +88,7 @@ export default {
                         result = response.docs.map(keptresource => {
                             return {
                                 title: keptresource.title,
+                                image: keptresource.picture,
                                 url: `/resource/${keptresource.id}`,
                                 lines: [ 
                                     `${keptresource.author}, ${keptresource.releasedate}`,
@@ -128,8 +129,7 @@ export default {
             sendGet('https://orsaymediatheque.herokuapp.com/api/user/manager/getUsersInfo/info', [{name: 'name', value : searchCriteria.simpleCriteria}]).
                 then( response => {
                     if(response.success){
-                        
-                        console.log("users list : ", response.docs);
+                        // console.log("users list : ", response.docs);
                         const customersPres = response.docs.map(cust =>{
                             return {
                                 title: cust.name + ', ' + cust.firstname,

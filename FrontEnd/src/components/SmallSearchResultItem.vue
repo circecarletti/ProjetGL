@@ -1,7 +1,7 @@
 <template>
     <div class="small-search-result-item-area">
         <div class="image-area">
-            <img src="/images/genericCover.jpg">
+            <img class="image" :src="'/' + imageUrl">
         </div>
         <div class="text-area">
             <div class="title">
@@ -25,8 +25,17 @@
  *              Seules les trois première seront prises en compte.
  */
 export default {
-    props: ['title', 'url', 'lines'],
+    props: ['image', 'title', 'url', 'lines'],
     computed: {
+        imageUrl() {
+            // console.log("urlImage : ", this.image);
+            if(typeof this.title === 'string' && this.title.trim() !== ''){
+                return this.image;
+            }else{
+                return '';
+            }
+        },
+
         itemTitle() {
             if (typeof this.title === 'string' && this.title.trim() !== '') {
                 return this.title.trim();
@@ -34,6 +43,7 @@ export default {
                 return 'Inconnu...';
             }
         },
+
         goToLink() {
             if (typeof this.url === 'string' && this.url.trim() !== '') {
                 return this.url.trim();
@@ -41,6 +51,7 @@ export default {
                 return undefined;
             }
         },
+
         allLines() {
             if (Array.isArray(this.lines) && this.lines.length > 0) {
                 let counter = 0;

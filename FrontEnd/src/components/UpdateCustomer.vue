@@ -11,7 +11,7 @@
                     required :pattern="nameRegEx">
             </div>
             <div class="action-cell">
-                <button type="button" class="btn-green" @click="onUpdate('lastName')" :disabled="lastNameNotValid">Valider</button>
+                <button type="button" class="btn-green" @click="onUpdate('name')" :disabled="lastNameNotValid">Valider</button>
             </div>
         </div>
         <div class="line">
@@ -25,7 +25,7 @@
                     required :pattern="nameRegEx">
             </div>
             <div class="action-cell">
-                <button type="button" class="btn-green" @click="onUpdate('firstName')" :disabled="firstNameNotValid">Valider</button>
+                <button type="button" class="btn-green" @click="onUpdate('firstname')" :disabled="firstNameNotValid">Valider</button>
             </div>
         </div>
         <div class="line">
@@ -85,7 +85,7 @@
 
 <script>
 import { openModal} from './Modal.vue';
-import { sendPost } from '../services/httpHelpers.js';
+import { sendPut, sendGet } from '../services/httpHelpers.js';
 import { 
     regexStringFormulaForName, 
     regexStringFormulaForBalance,
@@ -101,13 +101,16 @@ export default {
             age: '',
             password: '',
             balance: '',
+            customerStatus: '',
             nameRegEx: regexStringFormulaForName,
             balanceRegEx: regexStringFormulaForBalance,
             ageRegEx: regexStringFormulaForAge,
         }
     },
+
     watch: {
         firstName() {
+            console.log("firstName : ", this.firstName);
             manageValidityMessage(
                 this.$refs['update-customer-first-name'],
                 `Le prénom est obligatoire et doit être au bon format.`);
@@ -128,9 +131,10 @@ export default {
                 `Le montant doit être un nombre strictement positif, avec un maximum de deux décimales.`);
         },
     },
+
     computed: {
         balanceNotValid() {
-            return !positiveNumberDecimalCheck(Number(this.balance), 2);
+            return this.balance.trim() === '' || !positiveNumberDecimalCheck(Number(this.balance), 2);
         },
         passwordNotValid() {
             return this.password === '';
@@ -145,54 +149,79 @@ export default {
             return this.firstName.trim() === '' || !this.$refs['update-customer-first-name'].validity.valid;
         },
     },
+
     methods: {
         onUpdate(field) {
             let item = '';
+            const custId = this.$route.params.customerId;
             const updatePayload = {
-                customerId: this.$route.params.customerId,
-                field
+                id: custId,
             };
             let toDo = true;
+            let url = '';
 
+            console.log("status : ", this.customerStatus);   
             switch(field) {
-                case 'lastName':
-                    item = 'e nom';
-                    updatePayload.value = this.lastName;
+                case 'name':
+                    item = 'lastNameItem';
+                    updatePayload.name = this.lastName;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateName`;
                     break;
-                case 'firstName':
-                    item = 'e prénom';
-                    updatePayload.value = this.fistName;
+                case 'firstname':
+                    item = 'firstNameItem';
+                    console.log("firstName : ", this.fistName);
+                    updatePayload.firstname = this.fistName;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateFirstName`;
                     break;
                 case 'age':
-                    item = `'age`;
-                    updatePayload.value = this.age;
+                    item = `ageItem`;
+                    updatePayload.age = this.age;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateAge`;
                     break;
                 case 'password':
-                    item = 'e mot de passe';
-                    updatePayload.value = this.password;
+                    item = 'passwordItem';
+                    updatePayload.password = this.password;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updatePassword`;
                     break;
                 case 'balance':
-                    item = 'e solde';
-                    updatePayload.value = this.balance;
+                    item = 'balanceItem';
+                    updatePayload.balance = this.balance;
                     break;
                 default:
                     toDo = false;
-                    openModal(this, 'update-customer-error-modal', `Type de champ inconnu : ${field}`);
+                    openModal(this, 'update-customer-error-modal', `Type de champ inconnu : ${field} pour un statut : ${this.customerStatus}`);
             }
 
             if (toDo) {
-                sendPost(`https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/updateCustomer.json`, updatePayload).
+                sendPut(url, updatePayload).
                     then( response => {
-                        console.log(response);
-                        openModal(this, 'update-customer-update-modal', `L${item} a bien été mis à jour.`)
+                        if(response.success){
+                            openModal(this, 'update-customer-update-modal', `L'item : '${item}' de l'utilisateur ${custId} a bien été mis à jour.`);
+                        }else{
+                            console.log(`Error in updating item ${item} of customer ${custId} : `, response.message);
+                            openModal(this, 'update-customer-error-modal', `L'enregistrement a échoué`);
+                        }
                     }).
                     catch( error => {
                         console.error(error);
-                        openModal(this, 'update-customer-error-modal', `L'enregistrement a échoué : ${error.message}`);
+                        openModal(this, 'update-customer-error-modal', `La modification a échoué : ${error.message}`);
                     });
             }
 
         }
+    },
+
+    created(){
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${this.$route.params.customerId}`).
+            then( response => {
+                if(response.success){
+                    this.customerStatus = (response.docs.member.statut).trim();
+                    // console.log("response of getting status of user info by id : ", this.customerStatus);
+                }else{
+                    console.log("error in getting customer informations : ", response.message);
+                    this.customerStatus = 'undefinedStatus';
+                }
+            });
     }
 }
 </script>

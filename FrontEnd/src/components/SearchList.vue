@@ -5,7 +5,7 @@
         </div>
         <div class="line" v-for="(anItem, index) in result" :key="anItem" @click="onSelect(index)">
             <div class="image-area">
-                <img src="/images/genericCover.jpg">
+                <img class="image" :src="'/' + anItem.picture">
             </div>
             <div class="text-area">
                 <div class="title">

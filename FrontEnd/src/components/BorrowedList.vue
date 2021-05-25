@@ -50,6 +50,7 @@ import { openModal} from './Modal.vue';
 export default {
     data() {
         return {
+            customerStatus: '',
             borrowedItems: [],
             dataError: false,
             waiting: false,
@@ -64,15 +65,15 @@ export default {
             return this.itemIdToBorrow.trim() !== '' && this.$refs['itemIdToBorrow'].validity.valid;
         },
     },
+
     methods: {
         onRemove(borrowedId) {
             const customerId = this.$route.params.customerId;
             const removePayload = {
-                customerId,
-                itemId: borrowedId
+                id: customerId,
+                idresource: borrowedId
             };
-           // A FAIRE : appeler le bon service de retrait d'un ouvrage de la liste d'emprunt
-            sendPost('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/removeBorrowed.json', removePayload).
+            sendPost('https://orsaymediatheque.herokuapp.com/api/user/manager/removeResourceToMember', removePayload).
                 then( response => {
                     console.log(response);
                     // Si tout est ok, on n'a plus qu'à retirer l'objet de la liste
@@ -113,23 +114,31 @@ export default {
                     });
 
             }
+        },
+
+        setCustomerStatus(){
+            sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${this.$route.params.customerId}`).
+            then( response => {
+                if(response.success){
+                    this.customerStatus = (response.docs.member.statut).trim();
+                    console.log("response of getting status of user info by id : ", this.customerStatus);
+                }else{
+                    console.log("error in getting customer informations : ", response.message);
+                    this.customerStatus = 'undefinedStatus';
+                }
+            });
         }
     },
 
     mounted() {
+        this.setCustomerStatus;
+        console.log("customer status in mounted : ", this.customerStatus);
         // ICI APPEL du service serveur qui retourne la liste des livres/films
         // empruntés en fonction de l'identifiant du client
-        //La valorisation du tableau des éléments empruntés se fait dans le "then"
-        // de la promise
         this.waiting = true;
         const userId = this.$route.params.customerId;
-        let url;
-        if(this.$store.getters['isUserChild']){
-            url = `https://orsaymediatheque.herokuapp.com/api/user/childmember/loanInfo/${userId}`;
-        }else{
-            url = `https://orsaymediatheque.herokuapp.com/api/user/adultmember/loanInfo/${userId}`;
-        }
-        sendGet(url).
+
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`).
             then( response => {
                 if(response.success){
                     const listOfResources = response.docs.member.loan.idresources;
@@ -149,7 +158,9 @@ export default {
                 this.waiting = false;
                 console.error(error);
             })
-    }
+    }, 
+
+    
 }
 </script>
 
