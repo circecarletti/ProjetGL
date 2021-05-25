@@ -85,7 +85,7 @@
 
 <script>
 import { openModal} from './Modal.vue';
-import { sendPut, sendGet } from '../services/httpHelpers.js';
+import { sendPut } from '../services/httpHelpers.js';
 import { 
     regexStringFormulaForName, 
     regexStringFormulaForBalance,
@@ -101,7 +101,6 @@ export default {
             age: '',
             password: '',
             balance: '',
-            customerStatus: '',
             nameRegEx: regexStringFormulaForName,
             balanceRegEx: regexStringFormulaForBalance,
             ageRegEx: regexStringFormulaForAge,
@@ -130,6 +129,15 @@ export default {
                 this.$refs['update-customer-balance'],
                 `Le montant doit être un nombre strictement positif, avec un maximum de deux décimales.`);
         },
+        password(newValue) {
+            if (newValue.length < 8) {
+                this.$refs['update-customer-password'].setCustomValidity(`Le mot de passe doit contenir 8 caractères au minimum.`);
+            } else {
+                this.$refs['update-customer-password'].setCustomValidity(``);
+                this.$refs['update-customer-password'].setCustomValidity(``);
+            }
+            
+        },
     },
 
     computed: {
@@ -137,7 +145,7 @@ export default {
             return this.balance.trim() === '' || !positiveNumberDecimalCheck(Number(this.balance), 2);
         },
         passwordNotValid() {
-            return this.password === '';
+            return this.password.length < 8;
         },
         ageNotValid() {
             return this.age.trim() === '' || !this.$refs['update-customer-age'].validity.valid;
@@ -160,36 +168,36 @@ export default {
             let toDo = true;
             let url = '';
 
-            console.log("status : ", this.customerStatus);   
             switch(field) {
                 case 'name':
                     item = 'lastNameItem';
                     updatePayload.name = this.lastName;
-                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateName`;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/manager/updateName`;
                     break;
                 case 'firstname':
                     item = 'firstNameItem';
-                    console.log("firstName : ", this.fistName);
-                    updatePayload.firstname = this.fistName;
-                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateFirstName`;
+                    console.log("firstName in update : ", this.firstName);
+                    updatePayload.firstname = this.firstName;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/manager/updateFirstName`;
                     break;
                 case 'age':
                     item = `ageItem`;
                     updatePayload.age = this.age;
-                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updateAge`;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/manager/updateAge`;
                     break;
                 case 'password':
                     item = 'passwordItem';
                     updatePayload.password = this.password;
-                    url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/updatePassword`;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/manager/updatePassword`;
                     break;
                 case 'balance':
                     item = 'balanceItem';
                     updatePayload.balance = this.balance;
+                    url = `https://orsaymediatheque.herokuapp.com/api/user/manager/modifyBalance`;
                     break;
                 default:
                     toDo = false;
-                    openModal(this, 'update-customer-error-modal', `Type de champ inconnu : ${field} pour un statut : ${this.customerStatus}`);
+                    openModal(this, 'update-customer-error-modal', `Type de champ inconnu : ${field}`);
             }
 
             if (toDo) {
@@ -211,18 +219,6 @@ export default {
         }
     },
 
-    created(){
-        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${this.$route.params.customerId}`).
-            then( response => {
-                if(response.success){
-                    this.customerStatus = (response.docs.member.statut).trim();
-                    // console.log("response of getting status of user info by id : ", this.customerStatus);
-                }else{
-                    console.log("error in getting customer informations : ", response.message);
-                    this.customerStatus = 'undefinedStatus';
-                }
-            });
-    }
 }
 </script>
 

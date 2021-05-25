@@ -31,6 +31,7 @@
  *  title : libellé du titre.
  *  user : Objet contenant les données de l'utilisateur
  *      {
+ *          status : statut,
  *          firstName: prénom,
  *          lastName: nom,
  *          email: email,

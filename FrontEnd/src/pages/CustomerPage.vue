@@ -73,7 +73,7 @@ export default {
                             numberOfChildren: 0,
                             balance: Number(response.docs.member.balance),
                         };
-                    }else{
+                    }else if(response.docs.member.statut === 'adultmember'){
                         userRequested = {
                             firstName: response.docs.member.firstname,
                             lastName: response.docs.member.name,
@@ -92,6 +92,7 @@ export default {
                 
 
                 if (this.isCustomer || this.isChild) {
+                    // console.log("Vous êtes un utilisateur.");
                     const currentFunctionLists = [];
                     currentFunctionLists.push({ title: `Liste d'emprunt`, routePath: `/customer/${custId}/borrowed`});
                     if (this.isCustomer) {
@@ -99,7 +100,8 @@ export default {
                         currentFunctionLists.push({ title: `Compte(s) mineur(s)`, routePath: `/customer/${custId}/children-accounts-list`});
                     }
                     this.functionsList = currentFunctionLists;
-                } else if (typeof this.$route.params.customerId !== 'undefined') {
+                } else if (isManager) {
+                    // console.log("Vous êtes un manager.");
                     const currentFunctionLists = [];
                     currentFunctionLists.push({ title: `Modifications`, routePath: `/customer/${custId}/update`});
                     currentFunctionLists.push({ title: `Emprunts`, routePath: `/customer/${custId}/borrowed`});

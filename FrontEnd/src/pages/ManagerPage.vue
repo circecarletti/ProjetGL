@@ -172,7 +172,7 @@ export default {
                         firstName: response.docs.firstname,
                         lastName: response.docs.name,
                         age: response.docs.age,
-                        status: response.docs.statut,
+                        status: 'manager',
                     };
                     this.manager = userRequested;
                     this.dataError = false;

@@ -44,7 +44,7 @@
 
 
 <script>
-import { sendGet, sendPost } from '../services/httpHelpers.js'
+import { sendGet, sendPut } from '../services/httpHelpers.js'
 import { openModal} from './Modal.vue';
 
 export default {
@@ -57,6 +57,7 @@ export default {
             itemIdToBorrow: '',
         }
     },
+
     computed: {
         isManager() {
             return this.$store.getters['isUserManager'];
@@ -69,15 +70,16 @@ export default {
     methods: {
         onRemove(borrowedId) {
             const customerId = this.$route.params.customerId;
-            const removePayload = {
-                id: customerId,
-                idresource: borrowedId
-            };
-            sendPost('https://orsaymediatheque.herokuapp.com/api/user/manager/removeResourceToMember', removePayload).
+            const removePayload = {id : customerId, idresource : borrowedId};
+            sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/removeResourceToMember', removePayload).
                 then( response => {
-                    console.log(response);
-                    // Si tout est ok, on n'a plus qu'à retirer l'objet de la liste
-                    this.borrowedItems = this.borrowedItems.filter(item => item.id !== borrowedId);
+                        console.log(response);
+                    if(response.success){
+                        console.log(response);
+                        this.borrowedItems = this.borrowedItems.filter(item => item.id !== borrowedId);
+                    }else{
+                        console.log("Error in unborrowing ressource : ", response.message);
+                    }
                 }).
                 catch( error => {
                     console.error(error);
@@ -89,24 +91,24 @@ export default {
             if (this.isIdValidToBorrow) {
                 const customerId = this.$route.params.customerId;
                 const borrowPayload = {
-                    customerId,
-                    itemId: Number(this.itemIdToBorrow)
+                    id : customerId,
+                    idresource: Number(this.itemIdToBorrow)
                 };
-                // A FAIRE : appeler le bon service d'emprunt d'un ouvrage
-                sendPost('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/borrowResource.json', borrowPayload).
+                // Si tout est ok, on n'a plus qu'à ajouter l'objet de la liste
+                sendPut('https://orsaymediatheque.herokuapp.com/api/user/manager/addResourceToMember', borrowPayload).
                     then( response => {
                         console.log(response);
-                        // Si tout est ok, on n'a plus qu'à ajouter l'objet de la liste,
-                        // la réponse doit renvoyer toutes les informations de la ressource
-                        // Sinon, il faut faire un autre appel au serveur pour les avoir, 
-                        // mais c'est pas terrible
-                        // Là, à part pour l'id, on met des données DUMMY
-                        this.borrowedItems.push({
+                        if(response.success){
+                            this.borrowedItems.push({
                             id: this.itemIdToBorrow,
-                            title: `On vient d'emprunter`,
-                            releaseDate: 666,
-                            author: `Mohâ !!!`
+                            title: response.resource.title,
+                            releaseDate: response.resource.releasedate,
+                            author: response.resource.author
                         });
+                        }else{
+                            console.log("Error in adding ressource to member : ", response.message);
+                        }
+                        
                     }).
                     catch( error => {
                         console.error(error);
@@ -116,30 +118,31 @@ export default {
             }
         },
 
-        setCustomerStatus(){
-            sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${this.$route.params.customerId}`).
+    },
+
+    mounted() {
+        this.waiting = true;
+        const userId = this.$route.params.customerId;
+        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${userId}`).
             then( response => {
+                // console.log("response to getting customer info : ", response);
                 if(response.success){
                     this.customerStatus = (response.docs.member.statut).trim();
-                    console.log("response of getting status of user info by id : ", this.customerStatus);
+                    // console.log("response of getting status of user info by id : ", this.customerStatus);
+                    
+                    let url = '';
+                    if(this.isManager){
+                        url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserLoanInfo/${userId}`;
+                    }else{
+                        url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`;
+                    }
+                    return  sendGet(url);
                 }else{
                     console.log("error in getting customer informations : ", response.message);
                     this.customerStatus = 'undefinedStatus';
                 }
-            });
-        }
-    },
-
-    mounted() {
-        this.setCustomerStatus;
-        console.log("customer status in mounted : ", this.customerStatus);
-        // ICI APPEL du service serveur qui retourne la liste des livres/films
-        // empruntés en fonction de l'identifiant du client
-        this.waiting = true;
-        const userId = this.$route.params.customerId;
-
-        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`).
-            then( response => {
+            }).then( response => {
+                console.log("list of items : ", response);
                 if(response.success){
                     const listOfResources = response.docs.member.loan.idresources;
                     console.log("liste d'emprunts : ", listOfResources);
@@ -157,7 +160,8 @@ export default {
                 this.dataError = true;
                 this.waiting = false;
                 console.error(error);
-            })
+            });
+            
     }, 
 
     
