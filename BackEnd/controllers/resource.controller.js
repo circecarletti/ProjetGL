@@ -141,7 +141,7 @@ module.exports.SearchByFilter = (req, res) => {
             queryType["$or"].push ( { "type" : req.query.type_videogames});
         }
     }
-
+    var queryobject;
     if( queryCategory["$or"].length>0 && queryType["$or"].length>0 ){
 
         queryAnd["$and"].push( queryCategory );
@@ -154,6 +154,8 @@ module.exports.SearchByFilter = (req, res) => {
             queryArray.push(query)
         }
         queryArray.push(queryAnd)
+        queryobject = Object.assign({} , ...queryArray);
+
     }
     else if(queryCategory["$or"].length>0) {
         if (!(query === {})){
@@ -161,8 +163,10 @@ module.exports.SearchByFilter = (req, res) => {
             queryArray.push(query)
         }
         queryArray.push(queryCategory)
+        queryobject = Object.assign({} , ...queryArray);
+
     }
-    else {
+    else if(queryType["$or"].length>0){
         console.log("querytype")
         console.log(query)
         console.log(queryType["$or"])
@@ -172,11 +176,13 @@ module.exports.SearchByFilter = (req, res) => {
         }
         queryArray.push(queryType)
         console.log(queryArray )
+        queryobject = Object.assign({} , ...queryArray);
+
+    }else{
+        queryobject = query;
     }
     console.log(queryArray)
-    const queryobject = Object.assign({} , ...queryArray);
-
-    console.log('queryobject')
+    //const queryobject = Object.assign({} , ...queryArray);
     console.log(queryobject)
 
     try {
