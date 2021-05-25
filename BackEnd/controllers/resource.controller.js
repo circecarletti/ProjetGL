@@ -63,7 +63,7 @@ module.exports.getResourceByID = async (req, res) => {
 };
 
 //search by filter
-module.exports.SearchByFilter = async (req, res) => {
+module.exports.SearchByFilter = (req, res) => {
 
     if (req.query === {}) {
         return res.json({success: false, message : 'error params'});
@@ -73,31 +73,36 @@ module.exports.SearchByFilter = async (req, res) => {
     console.log(req.query)
 
     var query = {};
-    var queryCategory = { $or: [] } ;
-    var queryType = { $or: [] } ; 
-    /* const query = {
-        $or: [ 
-            { "title" : { $regex: '.*' + name + '.*' }}, 
-            { "author" : { $regex: '.*' + name + '.*' }}
-        ]
-    }; */
-    console.log(query)
+    var queryAnd = { $and: [] };
+    var queryArray = new Array();
+    var queryCategory = { $or: [] };
+    var queryType = { $or: [] }; 
+
+    console.log(title)
 
     if(title) {
         if (!(title === "")) {
+            console.log()
             query.title = { $regex: '.*' + title + '.*' };
         }
     }
+    console.log("oka")
+    console.log(query)
+
+    console.log(query.title )
+
     if(author) {
         if (!(author === "")) {
             query.author = { $regex: '.*' + author + '.*' };
         }
     }
+
     if(req.query.category_child) {
         if (!(req.query.category_child === "")) {
             queryCategory["$or"].push( { "category" : req.query.category_child} );
         }
     }
+    
     if(req.query.category_adult) {
         if (!(req.query.category_adult === "")) {
             queryCategory["$or"].push( { "category" : req.query.category_adult} );
@@ -108,16 +113,19 @@ module.exports.SearchByFilter = async (req, res) => {
             queryCategory["$or"].push( { "category" : req.query.category_allpublic} );
         }
     }
+
     if(releasedate) {
         if (!(releasedate == 0)) {
             query.releasedate = releasedate;
         }
     }
+
     if(req.query.type_livre) {
         if (!(req.query.type_livre === "")) {
             queryType["$or"].push ( { "type" : req.query.type_livre});
         }
     }
+
     if(req.query.type_cd) {
         if (!(req.query.type_cd === "")) {
             queryType["$or"].push ( { "type" : req.query.type_cd});
@@ -134,17 +142,45 @@ module.exports.SearchByFilter = async (req, res) => {
         }
     }
 
-    if(queryCategory["$or"].length>0){
-        query.category = queryCategory;
-    }
+    if( queryCategory["$or"].length>0 && queryType["$or"].length>0 ){
 
-    if(queryType["$or"].length>0){
-        query.type = queryType;
+        queryAnd["$and"].push( queryCategory );
+        queryAnd["$and"].push( queryType );
+        console.log('query and ')
+        console.log(queryAnd)
+        console.log("&&&")
+        if (!(query === {})){
+            console.log('query empty ')
+            queryArray.push(query)
+        }
+        queryArray.push(queryAnd)
     }
+    else if(queryCategory["$or"].length>0) {
+        if (!(query === {})){
+            console.log('query empty ')
+            queryArray.push(query)
+        }
+        queryArray.push(queryCategory)
+    }
+    else {
+        console.log("querytype")
+        console.log(query)
+        console.log(queryType["$or"])
+        if (!(query === {})){
+            console.log('query empty ')
+            queryArray.push(query)
+        }
+        queryArray.push(queryType)
+        console.log(queryArray )
+    }
+    console.log(queryArray)
+    const queryobject = Object.assign({} , ...queryArray);
 
-    console.log(query)
+    console.log('queryobject')
+    console.log(queryobject)
+
     try {
-        await ResourceModel.find(query,'-_id -__v',function(err, docs){
+        ResourceModel.find(queryobject,'-_id -__v',function(err, docs){
             if(err){
                 return res.json({success: false, message : 'error search by filter ressources', err});
             }
@@ -214,3 +250,62 @@ module.exports.getNouveaute = async (req, res) => {
     }
 };
 
+
+
+/*
+
+//search by filter
+module.exports.SearchByFilter = async (req, res) => {
+
+    if (req.query === {}) {
+        return res.status(500).json({success: false, message : 'error params'});
+    }
+
+    const { title, author, category, releaseDate, type } = req.query
+    console.log(req.query)
+
+    var query = {};
+    console.log(query)
+
+    if(title) {
+        if (!(title === "")) {
+            query.title = { $regex: '.*' + title + '.*' };
+        }
+    }
+    if(author) {
+        if (!(author === "")) {
+            query.author = { $regex: '.*' + author + '.*' };
+        }
+    }
+    if(category) {
+        if (!(category === "")) {
+            query.category = category;
+        }
+    }
+    if(releaseDate) {
+        if (!(releaseDate == 0)) {
+            query.releaseDate = releaseDate;
+        }
+    }
+    if(type) {
+        if (!(type === "")) {
+            query.type = type;
+        }
+    }
+    console.log(query)
+    try {
+        await ResourceModel.find(query,'-_id -__v',function(err, docs){
+            if(err){
+                return res.status(400).json({success: false, message : 'error search by filter ressources', err});
+            }
+            if (docs.length){
+                return res.status(200).json({success: true, docs});
+            } else {
+                return res.status(400).json({success: false, message : 'ressources not found', err});
+            }
+        });
+    } catch(err) {
+        return res.status(400).json({ success: false, message: "search by filter resources"}); 
+    }
+};
+*/
