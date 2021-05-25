@@ -1,7 +1,7 @@
 <template>
     <div class="small-search-result-item-area">
         <div class="image-area">
-            <img class="image" :src="'/' + imageUrl">
+            <img src="/images/face.jpg">
         </div>
         <div class="text-area">
             <div class="title">
