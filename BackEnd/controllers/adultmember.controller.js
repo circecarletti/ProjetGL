@@ -321,11 +321,12 @@ module.exports.buyMembership = async (req, res) => {
                     console.log(objectchild)
                     //adult member have children
                     console.log(objectchild.childlist)
+                    if(objectchild.childlist.length >0){
+
                     const objectchildpopulate = await objectchild.populate('childlist').execPopulate();
                     console.log('populate ')
-                    console.log(objectchildpopulate)
-
-                    if(objectchild.childlist.length >0){
+                        console.log(objectchildpopulate)
+                        //const childlist
                         console.log('ok 2')
                         
                         let IdArray = objectchild.childlist;

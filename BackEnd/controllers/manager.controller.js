@@ -576,7 +576,7 @@ module.exports.addResourceToMember = async (req, res) => {
                     console.log(success);
                 }
         });
-        return res.json({success: true, message: 'the resource was borrowed at a cost of '+ price});    
+        return res.json({success: true, message: 'the resource was borrowed at a cost of '+ price , resource: resource });    
     } catch (err) {
         return res.json({success: false, message: "error resource not borrowed", err});
    }
