@@ -298,8 +298,8 @@ module.exports.buyMembership = async (req, res) => {
     try {
         const user = await MemberModel.findOne({id: email});
 
-        //if(user.subscribe)
-        //    return res.json({success:false, message:'member already suscribed'});
+        if(user.subscribe)
+            return res.json({success:false, message:'member already suscribed'});
 
         if(user.balance >= 100 ){
             MemberModel.updateOne(
@@ -316,26 +316,11 @@ module.exports.buyMembership = async (req, res) => {
                 {upsert: true},
                 async function (err, docs) {
                     if(err) return res.json({succes: false, message: "membership not purchased",  err});
-                    console.log('ok 1')
                     const objectchild = await AdultMemberModel.findOne({id: email}, 'childlist -_id').exec(); 
-                    console.log(objectchild)
-                    //adult member have children
-                    console.log(objectchild.childlist)
+                    //if adult member have children
                     if(objectchild.childlist.length >0){
-
-                    const objectchildpopulate = await objectchild.populate('childlist').execPopulate();
-                    console.log('populate ')
-                        console.log(objectchildpopulate)
-                        //const childlist
-                        console.log('ok 2')
-                        
-                        let IdArray = objectchild.childlist;
-                        console.log(IdArray)
-                        console.log('ok 3')
-
-                        let objectIdArray = IdArray.map(a => ObjectId(a));
-                        console.log(objectIdArray)
-
+                        const objectchildpopulate = await objectchild.populate('childlist').execPopulate();
+                        const IdArray =  (objectchildpopulate.childlist).map( function( a ){ return a.member; });
                         MemberModel.updateMany({_id : {$in: IdArray } }, {$set: { datesubscription: new Date, subscribe: true }}, { upsert:true } ,
                         function (err) {
                             if (err){
@@ -493,17 +478,21 @@ module.exports.renewMembership = async (req, res) => {
                     }
                 },
                 { new: true, upsert: true},
-                function (err,docs) {
-                    if(err) return res.json({success: false, message: "membership not renew",  err});
-                    MemberModel.updateMany({_id : {$in :[docs.childlist]}}, {$set: {subscribe: true, datesubscription: new Date}}, {upsert:true} ,
+                async function (err, docs) {
+                    if(err) return res.json({succes: false, message: "membership not renewed",  err});
+                    const objectchild = await AdultMemberModel.findOne({id: email}, 'childlist -_id').exec(); 
+                    //if adult member have children
+                    if(objectchild.childlist.length >0){
+                        const objectchildpopulate = await objectchild.populate('childlist').execPopulate();
+                        const IdArray =  (objectchildpopulate.childlist).map( function( a ){ return a.member; });
+                        MemberModel.updateMany({_id : {$in: IdArray } }, {$set: { datesubscription: new Date, subscribe: true }}, { upsert:true } ,
                         function (err) {
                             if (err){
-                                console.log(err)
+                            console.log(err);
                             }
-                        }
-                    );
-                }
-            );
+                        });
+                    }
+                });
             return res.json({ success: true, message: "membership renew"});
         }else {
             return res.json({success: false, message: "insufficient balance"});
