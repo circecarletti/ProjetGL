@@ -8,6 +8,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose')
 
+
 //informations user 
 module.exports.userInfo = async (req, res) => {
     const email = req.params.id;
@@ -92,12 +93,12 @@ module.exports.signUpChild = async (req, res) => {
         //check existence of adultmember
         const userExists = await AdultMemberModel.exists({ id : adultmember }); 
 
-        const adultmemberrattached = await AdultMemberModel.findOne({ id : adultmember }); 
+        const adultmemberrattached = await AdultMemberModel.findOne({ id : adultmember }).populate('member'); 
+
 
         if(userExists){
             //creating member //if adult is subscribe suscription for child too
-            const member = await MemberModel.create({id, password, name, firstname, statut:'childmember', subscribe: adultmemberrattached.subscribe});
-
+            const member = await MemberModel.create({id, password, name, firstname, statut:'childmember', subscribe: adultmemberrattached.member.subscribe});
             //creating child member
             const user = await ChildMemberModel.create({id:id, age,adultmember:adultmember, member});
 

@@ -103,23 +103,6 @@ memberSchema.statics.login = async function(email, password) {
     throw Error('incorrect email');
 };
 
-/*
-memberSchema.pre('update', async function (next) {
-    const user = this
-    //console.log(req.body.password)
-    console.log(user)
-    console.log(path.password)
-
-   // console.log(user.obj.password)
-    console.log(user._update.$set.password) //bon
-    if(user){
-        //const salt = await bcrypt.genSalt();
-        user.password = await bcrypt.hash(user._update.$set.password, 10);
-        next();
-    }else 
-        next();
-});
-*/
 
 const MemberModel = mongoose.model('member', memberSchema);
 module.exports = MemberModel;
