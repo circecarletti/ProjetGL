@@ -22,7 +22,7 @@ router.get('/getUserChildInfo/:id', managerController.getUserChildInfo);
 router.delete('/:id', managerController.deleteUser);
 
 //modifyBalance
-router.post('/modifyBalance', managerController.modifyBalance);
+router.put('/modifyBalance', managerController.modifyBalance);
 
 //add member 
 router.post('/addMember', managerController.addMember);

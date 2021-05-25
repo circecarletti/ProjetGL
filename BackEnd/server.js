@@ -5,7 +5,6 @@ const userRoutes = require('./routes/user.routes.js');  // a suppr
 const resourceRoutes = require('./routes/resource.routes.js'); 
 const ObjectId = require('mongoose').Types.ObjectId;
 
-
 const ResourceModel = require('./models/resource.model');
 const MemberModel = require('./models/member.model');
 
@@ -42,7 +41,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 
-
 //routes init
 app.get('/', (req, res) => {
     res.json({msg: "Hello on est dans l'api"});
@@ -61,7 +59,6 @@ app.get('/jwtidChild', requireAuthChild);
 app.get('/jwtidManager', requireAuthManager, (req, res) => {
     res.send(res.locals.user.id);
 });
-
 
 //middleware jwt to verify auth user 
 //launch middleware auth adult for all routes of adult member
