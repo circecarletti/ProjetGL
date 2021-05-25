@@ -29,35 +29,49 @@
 
 <script>
 import { openModal } from './Modal.vue';
-import { sendPost } from '../services/httpHelpers.js';
+import { sendPut, sendDelete } from '../services/httpHelpers.js';
 
 export default {
     methods: {
         onRelease() {
-            const releasePayload = { customerId: this.$route.params.customerId };
+            const releasePayload = { id: this.$route.params.customerId };
 
-            sendPost(`https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/releaseCustomer.json`, releasePayload).
+            sendPut(`https://orsaymediatheque.herokuapp.com/api/user/manager/unlockMember`, releasePayload).
                 then( response => {
                     console.log(response);
-                    openModal(this, 'update-delete-update-modal', `L'adhérent a bien été débloqué.`);
+                    if(response.success){
+                        openModal(this, 'update-delete-update-modal', `L'adhérent a bien été débloqué.`);
+                    }else{
+                        console.log('Error in releasing customer : ', response.message);
+                        openModal(this, 'update-delete-error-modal', response.message);
+                    }
                 }).
                 catch( error => {
                     console.error(error);
                     openModal(this, 'update-delete-error-modal', `L'adhérent n'a pas pu être débloqué : ${error.message}`);
                 });
         },
+
         onDelete() {
             openModal(this, 'delete-customer-confirmation-modal', 
                 'Etes vous sûr de vouloir supprimer cet adhérent ?');
         },
-        deleteCustomer() {
-            const deletePayload = { customerId: this.$route.params.customerId };
 
-            sendPost(`https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/deleteCustomer.json`, deletePayload).
+        deleteCustomer() {
+            const custId = this.$route.params.customerId
+
+            sendDelete(`https://orsaymediatheque.herokuapp.com/api/user/manager/${custId}`).
                 then( response => {
-                    console.log(response);
-                    const userId = this.$store.getters['userId'];
-                    this.$router.push(`/manager/${userId}/add-customer`);
+                    console.log("response of deleting : ", response);
+                    if(response.success){
+                        openModal(this, 'update-delete-update-modal', `L'adhérent a bien été supprimé.`);
+                        console.log(response);
+                        const userId = this.$store.getters['userId'];
+                        this.$router.push(`/manager/${userId}/add-customer`);
+                    }else{
+                        console.log('Error in deleting customer : ', response.message);
+                        openModal(this, 'update-delete-error-modal', `L'adhérent n'a pas pu être supprimé.`);
+                    }
                 }).
                 catch( error => {
                     console.error(error);

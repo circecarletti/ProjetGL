@@ -123,6 +123,7 @@ export default {
     mounted() {
         this.waiting = true;
         const userId = this.$route.params.customerId;
+        
         sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${userId}`).
             then( response => {
                 // console.log("response to getting customer info : ", response);
@@ -133,6 +134,9 @@ export default {
                     let url = '';
                     if(this.isManager){
                         url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserLoanInfo/${userId}`;
+                    }else if(this.customerStatus === 'adultmember'){
+                        sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
+                        url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`;
                     }else{
                         url = `https://orsaymediatheque.herokuapp.com/api/user/${this.customerStatus}/loanInfo/${userId}`;
                     }
@@ -142,10 +146,9 @@ export default {
                     this.customerStatus = 'undefinedStatus';
                 }
             }).then( response => {
-                console.log("list of items : ", response);
+                // console.log("list of items : ", response);
                 if(response.success){
                     const listOfResources = response.docs.member.loan.idresources;
-                    console.log("liste d'emprunts : ", listOfResources);
                     const items = listOfResources.map( fullItem => {
                         return { id: fullItem.id, title: fullItem.title, releaseDate: fullItem.releasedate, author: fullItem.author };
                     });

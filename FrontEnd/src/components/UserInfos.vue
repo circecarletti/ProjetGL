@@ -20,6 +20,12 @@
                 <div class="line" v-if="numberOfChildren >= 0">
                     <span class="label">Nombre d'enfant</span> : {{numberOfChildren}}
                 </div>
+                <div class="line" v-if="isNotManager">
+                    <span class="label">statut : </span> {{valueSubscribe}}
+                </div>
+                <div class="line" v-if="isNotManager">
+                    <span class="label">solde : </span> {{balance}} €
+                </div>
             </div>
         </div>
     </div>
@@ -31,10 +37,12 @@
  *  title : libellé du titre.
  *  user : Objet contenant les données de l'utilisateur
  *      {
+ *          subscribe : souscription,
  *          status : statut,
  *          firstName: prénom,
  *          lastName: nom,
  *          email: email,
+ *          balance : solde,
  *          age: l'age en années
  *          childrenAccountIds: tableau des identifiants de comptes de mineurs ratachés au compte. 
  *                              Non spécifié pour un administrateur.
@@ -79,6 +87,34 @@ export default {
                 return -1;
             }
         },
+        balance(){
+            if(this.isNotManager){
+                return this.user.balance;
+            }else{
+                return 0;
+            }
+        },
+        isNotManager(){
+            if(this.user.status !== 'manager'){
+                return true;
+            }else{
+                return false;
+            }
+        }, 
+        subscriber(){
+            if(this.isNotManager && this.user.subscribe){
+                return true;
+            }else{
+                return false;
+            }
+        },
+        valueSubscribe(){
+            if(this.subscriber){
+                return 'abonné';
+            }else{
+                return 'non-abonné';
+            }
+        }
     }
 }
 </script>

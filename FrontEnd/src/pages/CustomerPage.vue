@@ -54,15 +54,15 @@ export default {
         if(isChild){
             url = `https://orsaymediatheque.herokuapp.com/api/user/childmember/${custId}`;
         }else if (isAdult){
+            sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
             url = `https://orsaymediatheque.herokuapp.com/api/user/adultmember/${custId}`;
         }else if (isManager){
             url = `https://orsaymediatheque.herokuapp.com/api/user/manager/getUserInfoById/${custId}`
         }
-        
         sendGet(url).
             then( response => {
+                    console.log("response customerPage : ", response);
                 if(response.success){
-                    // console.log("response customerPage : ", response);
                     let userRequested = {};
                     if(response.docs.member.statut === 'childmember'){
                         userRequested = {
@@ -72,6 +72,8 @@ export default {
                             age: Number(response.docs.age),
                             numberOfChildren: 0,
                             balance: Number(response.docs.member.balance),
+                            subscribe : response.docs.member.subscribe,
+                            status : response.docs.member.statut,
                         };
                     }else if(response.docs.member.statut === 'adultmember'){
                         userRequested = {
@@ -80,7 +82,9 @@ export default {
                             email: response.docs.id,
                             age : Number(response.docs.age),
                             numberOfChildren: response.docs.childlist.length,
-                            balance: Number(response.docs.member.balance)
+                            balance: Number(response.docs.member.balance),
+                            subscribe : response.docs.member.subscribe,
+                            status : response.docs.member.statut,
                         };
                     }
                     this.dataError = false;

@@ -6,7 +6,7 @@
             <h3>Nouveautés :</h3>
             <div class="list-news-area" v-if="!waiting">
                 <div class="line" v-for="aData in newsData" :key="aData">
-                    <span class="title">{{aData.auteur}} [{{aData.titre}}]</span>
+                    <span class="title">{{aData.author}} [{{aData.title}}]</span>
                     <span class="synopsis">Synopsis :</span>
                     <p>{{aData.synopsis}}</p>
                 </div>
@@ -32,14 +32,22 @@ export default {
     },
     beforeMount() {
         this.waiting = true;
-        sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/stock.json').
+        sendGet('https://orsaymediatheque.herokuapp.com/api/resource/getNouveaute/news').
             then( response => {
-                // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                // QUE les nouveautés.
-                // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                // de filtrer les donnnées en fonction de l'appel reçu.
-                this.newsData = response.filter( aNews => aNews.nouveaute );
-                this.dataError = false;
+                if(response.success){
+                    const newResources = response.docs.map(newR =>{
+                            return {
+                                author : newR.author,
+                                title : newR.title,
+                                synopsis : newR.synopsis,
+                            }
+                        });
+                    this.newsData = newResources;
+                    this.dataError = false;
+                }else{
+                    console.log("Error in getting news : ", response.message);
+                    this.dataError = false;
+                }
                 this.waiting = false;
             }).
             catch( error => {

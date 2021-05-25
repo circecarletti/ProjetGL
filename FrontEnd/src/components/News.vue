@@ -11,7 +11,7 @@
             </div>
             <div class="display-area" v-if="!dataError && news.length > 0 && !waiting">
                 <div v-for="aNews in news" :key="aNews" class="new-spot">
-                    <img :src="aNews.url" class="image"  @click="onClick(aNews.id)">
+                    <img class="image" :src="'/' +  aNews.url"  @click="onClick(aNews.id)">
                 </div>
             </div>
             <the-spinner v-if="waiting"></the-spinner>
@@ -35,16 +35,24 @@ export default {
             this.$router.push(`/resource/${id}`);
         },
     },
+
     beforeMount() {
         this.waiting = true;
-        sendGet('https://projet-orsay-default-rtdb.europe-west1.firebasedatabase.app/stock.json').
+        sendGet('https://orsaymediatheque.herokuapp.com/api/resource/getNouveaute/news').
             then( response => {
-                // DUMMY le filtre est fait ici mais normalement le back ne doit renvoyer
-                // QUE les nouveautés.
-                // Il FAUT CHANGER ça quand l'api côté serveur sera prète, c'est au serveur back-end
-                // de filtrer les donnnées en fonction de l'appel reçu.
-                this.news = response.filter( aNews => aNews.nouveaute );
-                this.dataError = false;
+                if(response.success){
+                    const newResources = response.docs.map(newR =>{
+                            return {
+                                id : newR.id,
+                                url : newR.picture
+                            }
+                        });
+                    this.news = newResources;
+                    this.dataError = false;
+                }else{
+                    console.log("Error in getting news : ", response.message);
+                    this.dataError = false;
+                }
                 this.waiting = false;
             }).
             catch( error => {

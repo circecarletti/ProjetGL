@@ -14,6 +14,19 @@
         <div class="line action">
             <button type="button" @click="onValidate" :disabled="feedAmountDataNotValid">Valider</button>
         </div>
+        <div class="line"></div>
+        <div class="line">
+            <div>
+                Vous abonnez vous permet d'obtenir des 
+                <br>réductions (30%) sur vos prochains emprunts.
+                <br> Un abonnement coûte 100€/an : 
+            </div>
+            <div>
+                <button type="button" class="btn-green" @click="subscribe">
+                    s'abonner
+                </button>
+            </div>            
+        </div>
         <the-modal ref="theModalUpdateFailed" 
             title="Echec de la mise à jour du solde" 
             type="error"
@@ -45,6 +58,7 @@ export default {
             regExBalance: regexStringFormulaForBalance
         };
     },
+
     watch: {
         feedAmount() {
             manageValidityMessage(
@@ -52,12 +66,26 @@ export default {
                 `Le montant doit être un nombre strictement positif, avec un maximum de deux décimales.`);
         },
     },
+
     computed: {
         feedAmountDataNotValid() {
             return !positiveNumberDecimalCheck(Number(this.feedAmount), 2);
         },
     },
+
     methods: {
+
+        subscribe(){
+            sendGet(`https://orsaymediatheque.herokuapp.com/jwtidAdult`).then(() => {
+                return sendPut(`https://orsaymediatheque.herokuapp.com/api/user/adultmember/buyMembership`, {id : this.$store.getters['userId']});
+            }).then( response => {
+                    if(response.success){
+                        openModal(this, 'theModalUpdated', 'La souscription a bien été effectuée.');
+                    }else{
+                        openModal(this, 'theModalUpdateFailed', `La souscription n'a pas pu avoir lieu : ${response.message}`);
+                    }
+                })
+        },
 
         validateFeed() {
             const numValue = Number.parseFloat(this.feedAmount);
@@ -76,10 +104,12 @@ export default {
                     id : this.customerId,
                     balance : feedNumber,
                 };
-                
+
                 // ICI, appel du service de mise à jour du solde en fonction du this.customerId
                 // et du montant feedNumber
-                sendPut('https://orsaymediatheque.herokuapp.com/api/user/adultmember/fundAccount', addMoney).then(response =>{
+                sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult').then(()=>{
+                    return sendPut('https://orsaymediatheque.herokuapp.com/api/user/adultmember/fundAccount', addMoney);
+                }).then(response =>{
                     if(response.success){
                         this.currentBalance += feedNumber;
                         openModal(this, 'theModalUpdated', 'La mise à jour de votre solde a bien été effectuée.');
@@ -101,8 +131,9 @@ export default {
         // ICI appel du service donnant le solde actuel du compte en fonction
         // de l'identifiant du client
         this.customerId = this.$route.params.customerId;
-        sendGet(`https://orsaymediatheque.herokuapp.com/api/user/adultmember/${this.customerId}`).
-            then( response => {
+        sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult').then(()=>{
+            return sendGet(`https://orsaymediatheque.herokuapp.com/api/user/adultmember/${this.customerId}`)
+            }).then( response => {
                 if(response.success){
                     // console.log("response getting user infos : ", response);
                     const customer = response;
@@ -139,14 +170,19 @@ export default {
     align-items: center;
     width: 100%;
     padding-left: 1rem;
-    height: 2rem;
+    padding-top: 0.5rem;
+    height: 3rem;
+}
+
+.btn-green {
+    margin-left: 1rem;
 }
 
 .line > input[type="text"] {
     text-align: center;
     max-width: 8rem;
     margin-left: 2rem;
-    margin-right: 2rem;
+    margin-right: 0.5rem;
 }
 
 .line.action {

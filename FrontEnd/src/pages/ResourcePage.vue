@@ -102,9 +102,9 @@ export default {
 
         translateCategory(cat){
             switch (cat){
-                case 'childmember': 
+                case 'child': 
                     return 'enfant';
-                case 'adultmember' :
+                case 'adult' :
                     return 'adulte';
                 case 'allpublic' : 
                     return 'tous public';
@@ -128,6 +128,7 @@ export default {
                 if(this.$store.getters['isUserChild']){
                     url = 'https://orsaymediatheque.herokuapp.com/api/user/childmember/rentResource';
                 }else{
+                    sendGet('https://orsaymediatheque.herokuapp.com/jwtidAdult');
                     url = 'https://orsaymediatheque.herokuapp.com/api/user/adultmember/rentResource';
                 }
                 sendPut(url, borrowSend).

@@ -61,7 +61,7 @@ export default {
             customersResult: [],
             searchingCustomers: false,
             searchingResources: false,
-            manager: undefined,
+            manager: {},
             functionsList: [],
         };
     },
@@ -113,6 +113,7 @@ export default {
 
 
         onSearchCustomers(searchCriteria) {
+            this.customersResult = [];
             // const customerId = Number(searchCriteria.simpleCriteria);
             const customerName = searchCriteria.simpleCriteria;
             let criteria = {};
@@ -159,20 +160,19 @@ export default {
 
     created() {
         const managerId = this.$route.params.managerId;
+        console.log("creation page du manager : ", managerId);
         // Ici normalement, on appelle le service qui renvoie les données
         // de l'utilisateur en fonction de son id
-        // Donnee dummy valorisées dans le "then", comme la partie 
-        // qui définie les fonctionalités utilisables.
         sendGet(`https://orsaymediatheque.herokuapp.com/api/user/manager/${managerId}`).
             then( response => {
                 if(response.success){
-                    // console.log("infos manager : ", response);
+                    console.log("infos manager : ", response);
                     const userRequested = {
                         email: response.docs.id,
                         firstName: response.docs.firstname,
                         lastName: response.docs.name,
                         age: response.docs.age,
-                        status: 'manager',
+                        status: response.docs.statut,
                     };
                     this.manager = userRequested;
                     this.dataError = false;

@@ -140,7 +140,7 @@ export default {
         subscribe() {
             this.errorMsg = '';
             const newCustomer = {
-                firstName: this.firstName,
+                firstname: this.firstName,
                 name: this.lastName,
                 age: this.age,
                 id: this.email,
