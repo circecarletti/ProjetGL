@@ -129,11 +129,11 @@ export default {
                 criteriaObject.categories.map(type => type.toLowerCase());
                 criteriaObject.categories.map(cat => {
                     if(cat === 'child'){
-                        sendedCriterias.push({name: "category", value: 'category_child'});
+                        sendedCriterias.push({name: "category_child", value: 'child'});
                     }else if (cat === 'adult'){
-                        sendedCriterias.push({name: "category", value: 'category_adult'});
+                        sendedCriterias.push({name: "category_adult", value: 'adult'});
                     }else if (cat === 'allpublic'){
-                        sendedCriterias.push({name: "category", value: 'category_allpublic'});
+                        sendedCriterias.push({name: "category_allpublic", value: 'allpublic'});
                     }
                 });
             }
@@ -142,13 +142,13 @@ export default {
                 criteriaObject.types.map(type => type.toLowerCase());
                 criteriaObject.types.map(type => {
                     if(type === 'cd'){
-                        sendedCriterias.push({name: "type", value: "type_cd"});
+                        sendedCriterias.push({name: "type_cd", value: "cd"});
                     }else if (type === 'dvd'){
-                        sendedCriterias.push({name: "type", value: "type_dvd"});
+                        sendedCriterias.push({name: "type_dvd", value: "dvd"});
                     }else if (type === 'book'){
-                        sendedCriterias.push({name: "type", value: "type_livre"});
+                        sendedCriterias.push({name: "type_livre", value: "book"});
                     }else if (type === 'videogames'){
-                        sendedCriterias.push({name: "type", value: "type_videogames"});
+                        sendedCriterias.push({name: "type_videogames", value: "videogames"});
                     }
                 });
             }

@@ -109,6 +109,7 @@ export default {
                             author: response.resource.author
                         });
                         }else{
+                            openModal(this, 'borrowed-list-error-modal', `L'emprunt de la ressouce ${this.itemIdToBorrow} n'a put être effectué : ${response.message}`);
                             console.log("Error in adding ressource to member : ", response.message);
                         }
                         
