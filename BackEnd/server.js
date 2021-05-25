@@ -99,24 +99,20 @@ var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, functio
         }
     });
 });
-/*
-//add penalties to delayed loan member automatically every day at 00h10
-var delayPenalties = schedule.scheduleJob({hour: 02, minute: 06 }, async function() {
-    const list = await ResourceModel.find({loan: true, loanday: Number(0)}, 'idmember -_id').exec();
-    console.log(list);
-    var objectIdArray = Object.keys(list).map((key) => [Object.values(key)]);
-    console.log('obj ' + objectIdArray)
-    //var array = Object.values(objectIdArray[idmember])
-    //console.log(array)
+
+//add penalties (-5 euros to balance and set block at true) to delayed loan member automatically every day at 00h30
+var delayPenalties = schedule.scheduleJob({hour: 00, minute: 30 }, async function() {
+    const array = await ResourceModel.find({loan: true, loanday: Number(0)}, 'idmember -_id').exec();
+    console.log(array);
+    let objectIdArray = array.map(a => a.idmember);
     MemberModel.updateMany({_id : {$in: objectIdArray } }, {$set: {block: true}, $inc: {balance : Number(-5)}}, { upsert:true } ,
-        function (err,docs) {
+        function (err) {
             if (err){
             console.log(err);
             }
-            console.log('docs' + docs);
         });
     }
-);*/
+);
     
 //server
 app.listen(process.env.PORT, () => {

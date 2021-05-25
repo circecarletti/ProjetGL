@@ -123,6 +123,7 @@ module.exports.getUserInfoById = async (req, res) => {
         if(await AdultMemberModel.exists({id: email})){
             await AdultMemberModel.findOne({ id : email}, 'childList id age -_id')
                 .populate('member', " -password -id -__v -_id")  
+                .populate('childlist')
                 .then(function(docs){
                     console.log('mail ' + email);
                     return res.json({success: true, message: 'success get user info',docs});
@@ -588,6 +589,10 @@ module.exports.removeResourceToMember = async (req, res) => {
     console.log(idResource)
     console.log(email)
 
+    if(email === '' || idResource === ''){
+        return res.json({success:false, message:'error params empty'});
+    }
+
     //check if email is in the database
     if(!(await MemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
@@ -596,21 +601,24 @@ module.exports.removeResourceToMember = async (req, res) => {
         return res.json({success:false, message:'resource does not exist'});
 
     try {
-        console.log(idResource)
         const user = await MemberModel.findOne({ id : email});
-        console.log(user.loan);
         const objid = await ResourceModel.findOne({ id : idResource});
-        console.log(objid._id);
 
-        if(!(await LoanModel.exists({_id: user._id, idresources: ObjectId(objid._id) } ))){
-            return res.json({success: false, message: "resource is not borrowed", err});
+        if(((typeof objid.idmember) === "undefined") || (objid.loan == false ) || (objid.idmember === null) ){
+            console.log('okkk')
+            return res.json({success: false, message: "resource is not borrowed"});
         }
 
-        await LoanModel.findOneAndUpdate( 
+
+        if(!((objid.idmember).toString() ===  user._id.toString()) ){
+            return res.json({success: false, message: "resource is not borrowed by this member"});
+        }
+
+        LoanModel.findOneAndUpdate( 
             { _id: user.loan }, 
-            { $pull: { idresources: ObjectId(objid._id) } }, 
+            { $pull: { idresources: objid._id } }, 
             { new: true }, 
-            function(err, docs) {
+            function(err) {
                 if(err){
                     console.log(err)
                 }

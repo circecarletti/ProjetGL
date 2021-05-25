@@ -15,6 +15,7 @@ module.exports.userInfo = async (req, res) => {
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
+    
     try {
         //adult  
         await AdultMemberModel.findOne({ id : email}, 'childlist id age -_id')
@@ -289,7 +290,7 @@ module.exports.fundChildAccount = async (req, res) => {
 //buy membershio // acheter un abonnement
 module.exports.buyMembership = async (req, res) => {
     const email = req.body.id;
-
+    console.log(email)
     //check if email is in the database
     if(!(await AdultMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
@@ -300,7 +301,6 @@ module.exports.buyMembership = async (req, res) => {
         //if(user.subscribe)
         //    return res.json({success:false, message:'member already suscribed'});
 
-        console.log(user.balance);
         if(user.balance >= 100 ){
             MemberModel.updateOne(
                 {id: email}, 
@@ -314,25 +314,34 @@ module.exports.buyMembership = async (req, res) => {
                     }
                 },
                 {upsert: true},
-                async function (err) {
+                async function (err, docs) {
                     if(err) return res.json({succes: false, message: "membership not purchased",  err});
-                    await AdultMemberModel.findOne({id: email}, async function(err, docs){
-                        if(err)
-                            console.log(err)
-                        if(docs.childlist.length>0){
-                            const list = docs.childlist;
-                            var objectIdArray = list.map(s => ObjectId(s));
-                            console.log(objectIdArray);
-                            console.log(mongoose.Types.ObjectId.isValid(objectIdArray[0]))
-                            await MemberModel.updateMany({ _id : {$in: objectIdArray } }, {$set: {subscribe: true, datesubscription: new Date}}, {upsert:true} ,
-                                function (err) {
-                                    if (err){
-                                        console.log(err)
-                                    }
-                                }
-                            );
-                        }
-                    });
+                    console.log('ok 1')
+                    const objectchild = await AdultMemberModel.findOne({id: email}, 'childlist -_id').exec(); 
+                    console.log(objectchild)
+                    //adult member have children
+                    console.log(objectchild.childlist)
+                    const objectchildpopulate = await objectchild.populate('childlist').execPopulate();
+                    console.log('populate ')
+                    console.log(objectchildpopulate)
+
+                    if(objectchild.childlist.length >0){
+                        console.log('ok 2')
+                        
+                        let IdArray = objectchild.childlist;
+                        console.log(IdArray)
+                        console.log('ok 3')
+
+                        let objectIdArray = IdArray.map(a => ObjectId(a));
+                        console.log(objectIdArray)
+
+                        MemberModel.updateMany({_id : {$in: IdArray } }, {$set: { datesubscription: new Date, subscribe: true }}, { upsert:true } ,
+                        function (err) {
+                            if (err){
+                            console.log(err);
+                            }
+                        });
+                    }
                 });
             return res.json({ success: true, message: "membership purchased"});
         }else {
@@ -448,69 +457,6 @@ module.exports.rentResource = async (req, res) => {
         return res.json({success: false, message: "error resource not borrowed", err});
    }
 };
-
-//return a resource //retourner  une resource
-module.exports.returnResource = async (req, res) => {
-    const email = req.body.id;
-    const idResource = req.body.idresource;
-    console.log(idResource)
-    console.log(email)
-
-    //check if email is in the database
-    if(!(await AdultMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-
-    if(!(await ResourceModel.exists({ id: idResource})))
-        return res.json({success:false, message:'resource does not exist'});
-
-    try {
-        console.log(idResource)
-        const user = await MemberModel.findOne({ id : email});
-        console.log(user.loan);
-        const objid = await ResourceModel.findOne({ id : idResource});
-        console.log(objid._id);
-
-        if(!(await LoanModel.exists({_id: user._id, idresources: ObjectId(objid._id) } ))){
-            return res.json({success: false, message: "resource is not borrowed", err});
-        }
-
-        await LoanModel.findOneAndUpdate( 
-                { _id: user.loan }, 
-                { $pull: { idresources: ObjectId(objid._id) } }, 
-                { new: true }, 
-                function(err, docs) {
-                    if(err){
-                        console.log(err)
-                    }
-                } 
-        );
-
-        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null, loanday: Number(30) }}, {upsert: true} ,
-            function (err, success) {
-                if (err) {
-                    return res.json({success: false, message: "error modify resource", err});
-                } else {
-                    console.log(success);
-                }
-            }
-        );
-
-        MemberModel.findOneAndUpdate({id: email}, {$inc: {nbresource: -1 }} ,
-            function (err, success) {
-                if (err) {
-                    return res.json({success: false, message: "error modify resource", err});
-                } else {
-                    console.log(success);
-                }
-            }
-        );
-        return res.json({success: true, message: 'success returning the resource'});    
-    } catch (err) {
-        return res.json({success: false, message: "error returning the resource", err});
-   }
-};
-
-
 
 //renew membershio // renouveller un abonnement renouvellement automatique pour les enfants egalement
 module.exports.renewMembership = async (req, res) => {

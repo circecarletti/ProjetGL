@@ -207,67 +207,6 @@ module.exports.rentResource = async (req, res) => {
 };
 
 
-//return a resource //retourner  une resource
-module.exports.returnResource = async (req, res) => {
-    const email = req.body.id;
-    const idResource = req.body.idresource;
-    console.log(idResource)
-    console.log(email)
-
-    //check if email is in the database
-    if(!(await ChildMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-
-    if(!(await ResourceModel.exists({ id: idResource})))
-        return res.json({success:false, message:'resource does not exist'});
-
-    try {
-        console.log(idResource)
-        const user = await MemberModel.findOne({ id : email});
-        console.log(user.loan);
-        const objid = await ResourceModel.findOne({ id : idResource});
-        console.log(objid._id);
-
-        if(!(await LoanModel.exists({_id: user._id, idresources: ObjectId(objid._id) } ))){
-            return res.json({success: false, message: "resource is not borrowed", err});
-        }
-
-        await LoanModel.findOneAndUpdate( 
-                { _id: user.loan }, 
-                { $pull: { idresources: ObjectId(objid._id) } }, 
-                { new: true }, 
-                function(err, docs) {
-                    if(err){
-                        console.log(err)
-                    }
-                } 
-        );
-
-        await ResourceModel.findOneAndUpdate({id: idResource}, {$set: {loan: false, idmember: null, loanday: Number(30) }}, {upsert: true} ,
-            function (err, success) {
-                if (err) {
-                    return res.json({success: false, message: "error modify resource", err});
-                } else {
-                    console.log(success);
-                }
-            }
-        );
-
-        MemberModel.findOneAndUpdate({id: email}, {$inc: {nbresource: -1 }} ,
-            function (err, success) {
-                if (err) {
-                    return res.json({success: false, message: "error modify resource", err});
-                } else {
-                    console.log(success);
-                }
-            }
-        );
-        return res.json({success: true, message: 'success returning the resource'});    
-    } catch (err) {
-        return res.json({success: false, message: "error returning the resource", err});
-   }
-};
-
 
 //update password
 module.exports.updatePassword = async (req, res) => {
