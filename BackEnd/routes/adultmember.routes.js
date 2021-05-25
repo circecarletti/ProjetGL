@@ -22,15 +22,6 @@ router.put('/fundAccount', adultMemberController.fundAccount);
 //fund child account // approvisionner compte mineur
 router.put('/fundChildAccount', adultMemberController.fundChildAccount);
 
-//route update name
-router.put('/updateName', adultMemberController.updateName);
-
-//route update firstname
-router.put('/updateFirstName', adultMemberController.updateFirstName);
-
-//route update age
-router.put('/updateAge', adultMemberController.updateAge);
-
 //buy membership 
 router.put('/buyMembership', adultMemberController.buyMembership);
 
@@ -39,8 +30,5 @@ router.put('/renewMembership', adultMemberController.renewMembership);
 
 //rent a resource
 router.put('/rentResource', adultMemberController.rentResource);
-
-//route update password
-router.put('/updatePassword', adultMemberController.updatePassword);
 
 module.exports = router;

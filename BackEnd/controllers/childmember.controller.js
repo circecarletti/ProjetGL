@@ -37,7 +37,7 @@ module.exports.getLoanInfo = async (req, res) => {
     if(!(await ChildMemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
     try {
-        //adult  
+        //child  
         await ChildMemberModel.findOne({ id : email}, ' -_id -id -age -__v -adultmember')
         .populate({path:'member', select: 'member.loan -_id', populate:[{ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]}]})
         .exec(function(err, docs){
@@ -52,91 +52,6 @@ module.exports.getLoanInfo = async (req, res) => {
     }
 };
 
-//update name
-module.exports.updateName = async (req, res) => {
-    const email = req.body.id;
-    const name = req.body.name;
-
-    //check if email is in the database
-    if(!(await ChildMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-    
-    try {
-        MemberModel.findOneAndUpdate(
-                {id: email}, 
-                {
-                    $set: {
-                        name: name
-                    }
-                },
-                { new: true, upsert: true, setDefaultsOnInsert: true},
-                (err,docs) => {
-                    if(err) {
-                        return res.json({success: false, message: "Name not modified",  err});
-                    }
-                }
-            );
-        return res.json({ success: true, message: "name modified"}); 
-    } catch (err) {
-        return res.json({success: false, message: "error name not modified", err});
-   }
-};
-
-//update firstname
-module.exports.updateFirstName = async (req, res) => {
-    const email = req.body.id;
-    const firstname = req.body.firstname;
-
-    //check if email is in the database
-    if(!(await ChildMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-    
-    try {
-        MemberModel.findOneAndUpdate(
-                {id: email}, 
-                {
-                    $set: {
-                        firstname: firstname
-                    }
-                },
-                { new: true, upsert: true, setDefaultsOnInsert: true},
-                (err,docs) => {
-                    if(err) return res.json({success: false, message: "firstname not modified",  err});
-                }
-            );
-        return res.json({ success: true, message: "firstname modified"}); 
-    } catch (err) {
-        return res.json({success: false, message: "error firstname not modified", err});
-   }
-};
-
-//update AGE
-module.exports.updateAge = async (req, res) => {
-    const email = req.body.id;
-    const age = req.body.age;
-
-    //check if email is in the database
-    if(!(await ChildMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-    
-    try {
-        ChildMemberModel.findOneAndUpdate(
-            {id: email}, 
-            {
-                $set: {
-                    age: age
-                }
-            },
-            { new: true, upsert: true, setDefaultsOnInsert: true},
-            (err,docs) => {
-                if(err) return res.json({success: false, message: "age not modified",  err});
-            }
-        );
-        return res.json({ success: true, message: "age modified"}); 
-    } catch (err) {
-        return res.json({success: false, message: "error age not modified", err});
-    }
-};
 
 //rent a resource //louer une resource ////////////////////
 module.exports.rentResource = async (req, res) => {
@@ -206,38 +121,3 @@ module.exports.rentResource = async (req, res) => {
    }
 };
 
-
-
-//update password
-module.exports.updatePassword = async (req, res) => {
-    const email = req.body.id;
-    const password = req.body.password;
-
-    //check if email is in the database
-    if(!(await ChildMemberModel.exists({ id: email})))
-        return res.json({success:false, message:'email not in database'});
-    
-    try {
-        const salt = await bcrypt.genSalt();
-        newpassword = await bcrypt.hash(password, salt);
-        MemberModel.findOneAndUpdate(
-                {id: email}, 
-                {
-                    $set: {
-                        password: newpassword
-                    }
-                },
-                { new: true, upsert: true, setDefaultsOnInsert: true},
-                (err,docs) => {
-                    if(err) {
-                        console.log(err);
-                        res.json({success: false, message: "password not modified",  err});
-                        return;
-                    }
-                }
-            )
-        return res.json({ success: true, message: "password modified"}); 
-    } catch (err) {
-        return res.json({success: false, message: "password not modified", err});
-   }
-};

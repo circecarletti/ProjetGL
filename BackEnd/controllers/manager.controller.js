@@ -157,15 +157,28 @@ module.exports.getUserLoanInfo = async (req, res) => {
     if(!(await MemberModel.exists({ id: email})))
         return res.json({success:false, message:'email not in database'});
     try {
+        const user =  await MemberModel.findOne({ id : email});
+        if (user.statut === 'adultmember'){
         //adult  
-        await MemberModel.findOne({ id : email}, '-_id -id -age -childlist -__v')
-        .populate({ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]})
+        await AdultMemberModel.findOne({ id : email}, '-_id -id -age -childlist -__v')
+        .populate({path:'member', select: 'member.loan -_id', populate:[{ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]}]})
         .exec(function(err, docs){
                 if(err){
                     return res.json({success: false, message : ' error get loan info', err});
                 }
-                res.json({success: true, message:'success get loan info', docs});
+                return res.json({success: true, message:'success get loan info', docs});
             });
+        }else {
+        //child  
+        await ChildMemberModel.findOne({ id : email}, ' -_id -id -age -__v -adultmember')
+        .populate({path:'member', select: 'member.loan -_id', populate:[{ path:'loan', select: '-_id -__v -idadherent', populate:[{path:'idresources', select:'-_id -idadherent'}]}]})
+        .exec(function(err, docs){
+                if(err){
+                    return res.json({success: false, message : ' error get info childinfo', err});
+                }
+                return res.json({success: true, message:'success get info childinfo', docs});
+            });
+        }
     }catch(err){
         console.log(err);
         return res.json({success: false, message : 'error get loan info', err});
@@ -340,9 +353,10 @@ module.exports.unlockMember = async (req, res) => {
         return res.json({success:false, message:'email not in database'});
     
     try {
-        const lock = await MemberModel.findOne({id: email}).select('block -_id');
-        console.log(lock);
-        if(!lock.lock) 
+        const user = await MemberModel.findOne({id: email}).select('block -_id');
+        console.log(user);
+
+        if(!user.block) 
             return res.json({success: false, message: 'member not lock'});
         
         MemberModel.updateOne(
