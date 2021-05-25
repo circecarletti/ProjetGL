@@ -3,8 +3,11 @@ const cookieParser = require('cookie-parser'); //library for using cookie
 const schedule = require('node-schedule'); //require node shedule for automatic function launch
 const userRoutes = require('./routes/user.routes.js');  // a suppr
 const resourceRoutes = require('./routes/resource.routes.js'); 
+const ObjectId = require('mongoose').Types.ObjectId;
+
 
 const ResourceModel = require('./models/resource.model');
+const MemberModel = require('./models/member.model');
 
 const adultMemberRoutes = require('./routes/adultmember.routes.js'); //routes adultmember
 const childMemberRoutes = require('./routes/childmember.routes.js'); //routes childmember
@@ -90,15 +93,9 @@ app.use('/api/resource', resourceRoutes);
 //routes creating a manager
 app.use('/api/programmer', programmerRoutes);
 
-
-var test = schedule.scheduleJob({hour: 19, minute: 52}, function(){
-    console.log('il est 19h52');
-    console.log('il est 19h52');
-});
-
-//decrement days to loan member every day at 00h00
+//decrement days to loan member automatically every day at 00h00
 var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, function(){
-    ResourceModel.updateMany({loan: true}, {$inc: {loanday: Number(-1)}}, {upsert:true} ,
+    ResourceModel.updateMany({loan: true, loanday: { $gt: 0 }}, {$inc: {loanday: Number(-1)}}, {upsert:true} ,
     function (err) {
         if (err){
             console.log(err)
@@ -106,16 +103,24 @@ var decreaseRemainingDays = schedule.scheduleJob({hour: 00, minute: 00}, functio
     });
 });
 /*
-//add penalties to delayed loan member every day at 00h10
-var delayPenalties = schedule.scheduleJob({hour: 00, minute: 10}, function(){
-    ResourceModel.updateMany({loan: true}, {$inc: {loanday: Number(-1)}}, {upsert:true} ,
-    function (err) {
-        if (err){
-            console.log(err)
-        }
-    });
-});*/
-
+//add penalties to delayed loan member automatically every day at 00h10
+var delayPenalties = schedule.scheduleJob({hour: 02, minute: 06 }, async function() {
+    const list = await ResourceModel.find({loan: true, loanday: Number(0)}, 'idmember -_id').exec();
+    console.log(list);
+    var objectIdArray = Object.keys(list).map((key) => [Object.values(key)]);
+    console.log('obj ' + objectIdArray)
+    //var array = Object.values(objectIdArray[idmember])
+    //console.log(array)
+    MemberModel.updateMany({_id : {$in: objectIdArray } }, {$set: {block: true}, $inc: {balance : Number(-5)}}, { upsert:true } ,
+        function (err,docs) {
+            if (err){
+            console.log(err);
+            }
+            console.log('docs' + docs);
+        });
+    }
+);*/
+    
 //server
 app.listen(process.env.PORT, () => {
     console.log(`listening on port ${process.env.PORT}`);
