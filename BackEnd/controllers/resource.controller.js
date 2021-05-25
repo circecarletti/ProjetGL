@@ -184,3 +184,33 @@ module.exports.getResourceAvailable = async (req, res) => {
         return res.json({ success: false, message: "error get resource by id"}); 
     }
 };
+
+
+
+//getNouveaute
+module.exports.getNouveaute = async (req, res) => {
+    try {
+        const query = {
+            $or: [ 
+                { "id" : Number(5) }, 
+                { "id" : Number(6) },
+                { "id" : Number(7) },
+                { "id" : Number(8) } 
+            ]
+        };
+
+        console.log(query)
+        console.log(Number(5))
+
+        await ResourceModel.find(query, function(err, docs) {
+            if(err){
+                return res.json({success: false, message : 'error get nouveaute', err});
+            }
+            return res.json({success: true, available: true, message:'success get news resource', docs});
+        });
+    }
+    catch(err){
+        return res.json({ success: false, message: "get news resource"}); 
+    }
+};
+

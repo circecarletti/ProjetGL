@@ -11,4 +11,6 @@ router.get('/:id', resourceController.getResourceByID);
 
 router.get('/getAvailable/:id', resourceController.getResourceAvailable);
 
+router.get('/getNouveaute/news', resourceController.getNouveaute);
+
 module.exports = router;
