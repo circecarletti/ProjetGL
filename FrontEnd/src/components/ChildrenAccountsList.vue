@@ -231,7 +231,7 @@ export default {
                         console.log(response);
                         if(response.success){
                             openModal(this, 'theModalUpdated', `Le compte pour mineur a bien été créé.`);
-                            this.accountsList.push({firstName : newChildAccount.firstname, lastName: newChildAccount.name, balance: 0, email : newChildAccount.id});
+                            this.refreshList();
                         }else{
                             openModal(this, 'theModalError', `L'enregistrement a échoué : ${response.message}`);
                             console.log("Error in creating new child : ", response.message);
