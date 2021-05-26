@@ -33,6 +33,10 @@
                 <span class="label checkbox">Disponibilité sur place</span> : 
                 <input type="checkbox" :checked="available" :disabled="true">
             </div>
+            <div class="line">
+                <span class="label">Prix de la ressource </span> : {{price}}€ 
+                ({{suscriberPrice}}€ pour les abonnés) pour 30 jours.
+            </div>
             <div class="line actions">
                 <button type="button" @click="goBack()">Retour</button>
                 <button type="button" v-if="userIsCustomerOrChild && available" @click="borrow">Emprunter</button>
@@ -65,6 +69,7 @@ export default {
             title: '',
             urlImage: '',
             type: '',
+            price: '',
             resume: '',
             author: '',
             releaseDate: 0,
@@ -74,6 +79,13 @@ export default {
     },
 
     computed: {
+        suscriberPrice(){
+            if(this.price){
+                return Math.floor(this.price*0.7);
+            }else{
+                return 0;
+            }
+        },
         userIsCustomerOrChild() {
             return this.$store.getters['isUserCustomer'] || this.$store.getters['isUserChild'];
         },
@@ -184,6 +196,7 @@ export default {
                     this.dataError = false;
                     this.waiting = false;
 
+                    this.price = resource.price;
                     this.id= resource.id;
                     this.title= resource.title;
                     this.urlImage= resource.picture;
